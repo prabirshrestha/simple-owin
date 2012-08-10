@@ -59,6 +59,7 @@
   <ItemGroup>
     <Content Include="Global.asax" />
     <Content Include="Web.config" />
+    <Content Include="websocket.html" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Global.asax.cs">
