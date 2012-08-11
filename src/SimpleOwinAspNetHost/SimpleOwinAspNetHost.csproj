@@ -57,6 +57,7 @@
     <Reference Include="System.EnterpriseServices" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="index.html" />
     <Content Include="WebSocketEchoServer.html" />
     <Content Include="WebSocketEchoServerPureHttpHandler.html" />
     <Content Include="Global.asax" />
