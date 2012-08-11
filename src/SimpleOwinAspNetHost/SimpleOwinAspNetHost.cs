@@ -224,6 +224,10 @@ namespace SimpleOwinAspNetHost
                                 response.BufferOutput = false;
                                 response.StatusCode = responseStatus;
 
+                                object reasonPhrase;
+                                if (properties.TryGetValue(OwinConstants.ReasonPhrase, out reasonPhrase))
+                                    response.StatusDescription = Convert.ToString(reasonPhrase);
+
                                 if (responseHeader != null)
                                 {
                                     foreach (var header in responseHeader)
