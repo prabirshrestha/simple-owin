@@ -20,7 +20,7 @@ namespace SimpleOwinAspNetHost
             System.Threading.Tasks.Task<System.Tuple< // Result
                 System.Collections.Generic.IDictionary<string, object>, // Properties
                 int, // Status
-                System.Collections.Generic.IDictionary<string, string[]>, // HeadersB
+                System.Collections.Generic.IDictionary<string, string[]>, // Headers
                 System.Func< // CopyTo
                     System.IO.Stream, // Body
                     System.Threading.Tasks.Task>>>>; // Done
@@ -100,26 +100,22 @@ namespace SimpleOwinAspNetHost
 
     public class SimpleOwinAspNetRouteHandler : IRouteHandler
     {
-        private readonly AppAction _app;
+        private readonly SimpleOwinAspNetHandler _simpleOwinAspNetHandler;
 
         public SimpleOwinAspNetRouteHandler(AppAction app)
         {
-            _app = app;
+            _simpleOwinAspNetHandler = new SimpleOwinAspNetHandler(app);
         }
 
         public IHttpHandler GetHttpHandler(RequestContext requestContext)
         {
-            return new SimpleOwinAspNetHandler(_app);
+            return _simpleOwinAspNetHandler;
         }
     }
 
     public class SimpleOwinAspNetHandler : IHttpAsyncHandler
     {
         private readonly AppAction _app;
-
-#if ASPNET_WEBSOCKETS
-        private System.Net.WebSockets.WebSocketContext _webSocketContext;
-#endif
 
         public SimpleOwinAspNetHandler()
             : this(null)
@@ -144,7 +140,7 @@ namespace SimpleOwinAspNetHost
 
         public bool IsReusable
         {
-            get { return false; }
+            get { return true; }
         }
 
         public IAsyncResult BeginProcessRequest(HttpContext context, AsyncCallback callback, object state)
@@ -245,22 +241,21 @@ namespace SimpleOwinAspNetHost
                                     var wsDelegate = (WebSocketAction)temp;
                                     context.AcceptWebSocketRequest(async websocketContext =>
                                     {
-                                        _webSocketContext = websocketContext;
                                         env["aspnet.AspNetWebSocketContext"] = websocketContext;
-
-                                        await wsDelegate(WebSocketSendAsync, WebSocketReceiveAsync, WebSocketCloseAsync);
-
                                         var webSocket = websocketContext.WebSocket;
+
+                                        await wsDelegate(WebSocketSendAsync(webSocket), WebSocketReceiveAsync(webSocket), WebSocketCloseAsync(webSocket));
+
                                         switch (webSocket.State)
                                         {
-                                            case WebSocketState.Closed: // closed gracefully, no action needed
+                                            case WebSocketState.Closed:  // closed gracefully, no action needed
                                             case WebSocketState.Aborted: // closed abortively, no action needed
                                                 break;
                                             case WebSocketState.CloseReceived:
                                                 await webSocket.CloseAsync(WebSocketCloseStatus.NormalClosure, string.Empty, CancellationToken.None);
                                                 break;
                                             case WebSocketState.Open:
-                                            case WebSocketState.CloseSent: // // No close received, abort so we don't have to drain the pipe.
+                                            case WebSocketState.CloseSent: // No close received, abort so we don't have to drain the pipe.
                                                 websocketContext.WebSocket.Abort();
                                                 break;
                                             default:
@@ -327,25 +322,30 @@ namespace SimpleOwinAspNetHost
 
 #if ASPNET_WEBSOCKETS
 
-        private Task WebSocketSendAsync(ArraySegment<byte> buffer, int messageType, bool endOfMessage, CancellationToken cancel)
+        private static WebSocketSendAsync WebSocketSendAsync(WebSocket webSocket)
         {
-            return _webSocketContext.WebSocket.SendAsync(buffer, OpCodeToEnum(messageType), endOfMessage, cancel);
+            return (buffer, messageType, endOfMessage, cancel) =>
+                webSocket.SendAsync(buffer, OpCodeToEnum(messageType), endOfMessage, cancel);
         }
 
-        private async Task<WebSocketReceiveResultTuple> WebSocketReceiveAsync(ArraySegment<byte> buffer, CancellationToken cancel)
+        private static WebSocketReceiveAsync WebSocketReceiveAsync(WebSocket webSocket)
         {
-            var nativeResult = await _webSocketContext.WebSocket.ReceiveAsync(buffer, cancel);
-            return new WebSocketReceiveResultTuple(
-                EnumToOpCode(nativeResult.MessageType),
-                nativeResult.EndOfMessage,
-                (nativeResult.MessageType == WebSocketMessageType.Close ? null : (int?)nativeResult.Count),
-                (int?)nativeResult.CloseStatus,
-                nativeResult.CloseStatusDescription);
+            return async (buffer, cancel) =>
+                {
+                    var nativeResult = await webSocket.ReceiveAsync(buffer, cancel);
+                    return new WebSocketReceiveResultTuple(
+                        EnumToOpCode(nativeResult.MessageType),
+                        nativeResult.EndOfMessage,
+                        (nativeResult.MessageType == WebSocketMessageType.Close ? null : (int?)nativeResult.Count),
+                        (int?)nativeResult.CloseStatus,
+                        nativeResult.CloseStatusDescription);
+                };
         }
 
-        private Task WebSocketCloseAsync(int status, string description, CancellationToken cancel)
+        private static WebSocketCloseAsync WebSocketCloseAsync(WebSocket webSocket)
         {
-            return _webSocketContext.WebSocket.CloseOutputAsync((WebSocketCloseStatus)status, description, cancel);
+            return (status, description, cancel) =>
+                webSocket.CloseOutputAsync((WebSocketCloseStatus)status, description, cancel);
         }
 
         private static WebSocketMessageType OpCodeToEnum(int messageType)
@@ -371,6 +371,7 @@ namespace SimpleOwinAspNetHost
                     throw new ArgumentOutOfRangeException("webSocketMessageType", webSocketMessageType, string.Empty);
             }
         }
+
 #endif
 
         private static class OwinConstants
