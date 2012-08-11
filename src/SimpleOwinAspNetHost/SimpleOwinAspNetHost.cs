@@ -54,8 +54,8 @@ namespace SimpleOwinAspNetHost
                         string>; // closeStatusDescription
 
     using WebSocketReceiveAsync = System.Func<
-                System.ArraySegment<byte> /* data */,
-                System.Threading.CancellationToken /* cancel */,
+                System.ArraySegment<byte>, // data
+                System.Threading.CancellationToken, // cancel
                 System.Threading.Tasks.Task<
                     System.Tuple<
                         int, // messageType
@@ -79,8 +79,8 @@ namespace SimpleOwinAspNetHost
                 System.Threading.CancellationToken, // cancel
                 System.Threading.Tasks.Task>,
             System.Func< // WebSocketReceiveAsync
-                System.ArraySegment<byte> /* data */,
-                System.Threading.CancellationToken /* cancel */,
+                System.ArraySegment<byte>, // data
+                System.Threading.CancellationToken, // cancel
                 System.Threading.Tasks.Task<
                     System.Tuple<
                         int, // messageType
