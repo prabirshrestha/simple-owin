@@ -149,6 +149,11 @@ namespace SimpleOwinAspNetHost
 
         public IAsyncResult BeginProcessRequest(HttpContext context, AsyncCallback callback, object state)
         {
+            return BeginProcessRequest(new HttpContextWrapper(context), callback, state);
+        }
+
+        public IAsyncResult BeginProcessRequest(HttpContextBase context, AsyncCallback callback, object state)
+        {
             var tcs = new TaskCompletionSource<Action>(state);
             if (callback != null)
                 tcs.Task.ContinueWith(task => callback(task), TaskContinuationOptions.ExecuteSynchronously);
