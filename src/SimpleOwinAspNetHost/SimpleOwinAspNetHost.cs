@@ -246,6 +246,8 @@ namespace SimpleOwinAspNetHost
                                     context.AcceptWebSocketRequest(async websocketContext =>
                                     {
                                         _webSocketContext = websocketContext;
+                                        env["aspnet.AspNetWebSocketContext"] = websocketContext;
+
                                         await wsDelegate(WebSocketSendAsync, WebSocketReceiveAsync, WebSocketCloseAsync);
 
                                         var webSocket = websocketContext.WebSocket;
