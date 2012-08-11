@@ -101,11 +101,11 @@ namespace SimpleOwinAspNetHost
 
 #endif
 
-    public class WebSocketHelloworld
+    public class WebSocketEchoServer
     {
         private static Task<ResultTuple> CachedCompletedResultTupleTask;
 
-        static WebSocketHelloworld()
+        static WebSocketEchoServer()
         {
             var tcs = new TaskCompletionSource<ResultTuple>();
             tcs.TrySetResult(null);
@@ -149,7 +149,8 @@ namespace SimpleOwinAspNetHost
                 owinResponseStatus = 101;
                 WebSocketAction webSocketBody = async (sendAsync, receiveAsync, closeAsync) =>
                     {
-                        var buffer = new ArraySegment<byte>(new byte[6]);
+                        var buffer = new ArraySegment<byte>(new byte[100]);
+
                         while (true)
                         {
                             var webSocketResultTuple = await receiveAsync(buffer, CancellationToken.None);
@@ -161,11 +162,9 @@ namespace SimpleOwinAspNetHost
 
                             Debug.Write(Encoding.UTF8.GetString(buffer.Array, 0, count.Value));
 
-                            if (wsEndOfMessge)
-                                break;
+                            await sendAsync(new ArraySegment<byte>(buffer.Array, 0, count.Value),
+                                wsMessageType, wsEndOfMessge, CancellationToken.None);
                         }
-
-                        await closeAsync((int)WebSocketCloseStatus.NormalClosure, "Closing", CancellationToken.None);
                     };
 
                 owinResponseProperties["websocket.BodyFunc"] = webSocketBody;
