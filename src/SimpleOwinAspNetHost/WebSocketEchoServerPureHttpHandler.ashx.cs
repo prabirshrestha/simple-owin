@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.WebSockets;
+using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Web;
@@ -47,20 +48,64 @@ namespace SimpleOwinAspNetHost
                 Locker.ExitWriteLock();
             }
 
+            var buffer = new ArraySegment<byte>(new byte[1024]);
+
             // maintain socket
             while (true)
             {
-                var buffer = new ArraySegment<byte>(new byte[1024]);
 
-                // async wait for a change in the socket
-                var result = await socket.ReceiveAsync(buffer, CancellationToken.None);
+                WebSocketReceiveResult result;
+
+                try
+                {
+                    // async wait for a change in the socket
+                    result = await socket.ReceiveAsync(buffer, CancellationToken.None);
+                }
+                catch (Exception ex)
+                {
+                    // client is no longer available - delete from list
+                    Locker.EnterWriteLock();
+                    try
+                    {
+                        Clients.Remove(socket);
+                    }
+                    finally
+                    {
+                        Locker.ExitWriteLock();
+                    }
+
+                    break;
+                }
 
                 if (socket.State == WebSocketState.Open)
                 {
+                    if (result.Count == 0)
+                        continue;
+
+                    var bufferToSend = new ArraySegment<byte>(buffer.Array, 0, result.Count);
+
                     // echo to all clients
                     foreach (var client in Clients)
                     {
-                        await client.SendAsync(buffer, WebSocketMessageType.Text, true, CancellationToken.None);
+                        try
+                        {
+                            await client.SendAsync(bufferToSend, WebSocketMessageType.Text, true, CancellationToken.None);
+                        }
+                        catch (Exception ex)
+                        {
+                            // client is no longer available - delete from list
+                            Locker.EnterWriteLock();
+                            try
+                            {
+                                Clients.Remove(socket);
+                            }
+                            finally
+                            {
+                                Locker.ExitWriteLock();
+                            }
+
+                            break;
+                        }
                     }
                 }
                 else
