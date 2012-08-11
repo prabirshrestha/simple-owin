@@ -149,6 +149,8 @@ namespace SimpleOwinAspNetHost
                 owinResponseStatus = 101;
                 WebSocketAction webSocketBody = async (sendAsync, receiveAsync, closeAsync) =>
                     {
+                        // note: make sure to catch errors when calling sendAsync, receiveAsync and closeAsync
+                        // for simiplicity this code does not handle errors
                         var buffer = new ArraySegment<byte>(new byte[6]);
                         while (true)
                         {

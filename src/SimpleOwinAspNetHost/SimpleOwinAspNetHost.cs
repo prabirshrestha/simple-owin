@@ -144,7 +144,7 @@ namespace SimpleOwinAspNetHost
 
         public bool IsReusable
         {
-            get { return true; }
+            get { return false; }
         }
 
         public IAsyncResult BeginProcessRequest(HttpContext context, AsyncCallback callback, object state)

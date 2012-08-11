@@ -153,7 +153,18 @@ namespace SimpleOwinAspNetHost
 
                         while (true)
                         {
-                            var webSocketResultTuple = await receiveAsync(buffer, CancellationToken.None);
+                            WebSocketReceiveResultTuple webSocketResultTuple;
+                            try
+                            {
+                                webSocketResultTuple = await receiveAsync(buffer, CancellationToken.None);
+                            }
+                            catch (Exception ex)
+                            {
+                                Debug.WriteLine(ex.Message);
+                                // call closeAsync?
+                                break;
+                            }
+
                             int wsMessageType = webSocketResultTuple.Item1;
                             bool wsEndOfMessge = webSocketResultTuple.Item2;
                             int? count = webSocketResultTuple.Item3;
@@ -162,8 +173,19 @@ namespace SimpleOwinAspNetHost
 
                             Debug.Write(Encoding.UTF8.GetString(buffer.Array, 0, count.Value));
 
-                            await sendAsync(new ArraySegment<byte>(buffer.Array, 0, count.Value),
-                                wsMessageType, wsEndOfMessge, CancellationToken.None);
+                            try
+                            {
+                                await sendAsync(new ArraySegment<byte>(buffer.Array, 0, count.Value),
+                                        wsMessageType, wsEndOfMessge, CancellationToken.None);
+                            }
+                            catch (Exception ex)
+                            {
+                                Debug.WriteLine(ex.Message);
+                                // call closeAsync?
+                                break;
+                            }
+
+                            
                         }
                     };
 

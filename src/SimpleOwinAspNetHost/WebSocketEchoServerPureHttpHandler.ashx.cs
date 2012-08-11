@@ -62,6 +62,7 @@ namespace SimpleOwinAspNetHost
                 }
                 catch (Exception ex)
                 {
+                    System.Diagnostics.Debug.WriteLine(ex);
                     // client is no longer available - delete from list
                     RemoveClient(socket);
                     break;
@@ -83,6 +84,7 @@ namespace SimpleOwinAspNetHost
                         }
                         catch (Exception ex)
                         {
+                            System.Diagnostics.Debug.WriteLine(ex);
                             // client is no longer available - delete from list
                             RemoveClient(client);
                             continue;  // try sending to the next client
