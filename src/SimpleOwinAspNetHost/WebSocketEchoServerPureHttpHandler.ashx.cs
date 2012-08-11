@@ -53,7 +53,6 @@ namespace SimpleOwinAspNetHost
             // maintain socket
             while (true)
             {
-
                 WebSocketReceiveResult result;
 
                 try
@@ -64,16 +63,7 @@ namespace SimpleOwinAspNetHost
                 catch (Exception ex)
                 {
                     // client is no longer available - delete from list
-                    Locker.EnterWriteLock();
-                    try
-                    {
-                        Clients.Remove(socket);
-                    }
-                    finally
-                    {
-                        Locker.ExitWriteLock();
-                    }
-
+                    RemoveClient(socket);
                     break;
                 }
 
@@ -94,36 +84,30 @@ namespace SimpleOwinAspNetHost
                         catch (Exception ex)
                         {
                             // client is no longer available - delete from list
-                            Locker.EnterWriteLock();
-                            try
-                            {
-                                Clients.Remove(socket);
-                            }
-                            finally
-                            {
-                                Locker.ExitWriteLock();
-                            }
-
-                            break;
+                            RemoveClient(client);
+                            continue;  // try sending to the next client
                         }
                     }
                 }
                 else
                 {
                     // client is no longer available - delete from list
-                    Locker.EnterWriteLock();
-                    try
-                    {
-                        Clients.Remove(socket);
-                    }
-                    finally
-                    {
-                        Locker.ExitWriteLock();
-                    }
-
+                    RemoveClient(socket);
                     break;
-
                 }
+            }
+        }
+
+        private void RemoveClient(WebSocket socket)
+        {
+            Locker.EnterWriteLock();
+            try
+            {
+                Clients.Remove(socket);
+            }
+            finally
+            {
+                Locker.ExitWriteLock();
             }
         }
 
