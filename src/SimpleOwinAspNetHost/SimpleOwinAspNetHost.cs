@@ -348,7 +348,7 @@ namespace SimpleOwinAspNetHost
             return _webSocketContext.WebSocket.CloseOutputAsync((WebSocketCloseStatus)status, description, cancel);
         }
 
-        private WebSocketMessageType OpCodeToEnum(int messageType)
+        private static WebSocketMessageType OpCodeToEnum(int messageType)
         {
             switch (messageType)
             {
@@ -360,7 +360,7 @@ namespace SimpleOwinAspNetHost
             }
         }
 
-        private int EnumToOpCode(WebSocketMessageType webSocketMessageType)
+        private static int EnumToOpCode(WebSocketMessageType webSocketMessageType)
         {
             switch (webSocketMessageType)
             {
