@@ -235,8 +235,8 @@ namespace SimpleOwinAspNetHost
 #if ASPNET_WEBSOCKETS
                                 object tempWsBodyDelegate;
                                 if (responseStatus == 101 &&
-                                    properties.TryGetValue(OwinConstants.WebSocketBodyDelegte, out tempWsBodyDelegate)
-                                    && tempWsBodyDelegate != null)
+                                    properties.TryGetValue(OwinConstants.WebSocketBodyDelegte, out tempWsBodyDelegate) &&
+                                    tempWsBodyDelegate != null)
                                 {
                                     var wsBodyDelegate = (WebSocketAction)tempWsBodyDelegate;
                                     context.AcceptWebSocketRequest(async websocketContext =>
