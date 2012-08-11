@@ -5,7 +5,8 @@
 </head>
 <body>
     <script>
-        var wsUri = "ws://echo.websocket.org/";
+        //var wsUri = "ws://echo.websocket.org/";
+        var wsUri = "ws://localhost/SimpleOwinAspNetHost/websocket/helloworld";
         var output;
         function init() {
             output = document.getElementById("output");
@@ -33,7 +34,8 @@
             writeToScreen('<span style="color: red;">ERROR:</span> ' + evt.data);
         }
         function doSend(message) {
-            writeToScreen("SENT: " + message); websocket.send(message);
+            writeToScreen("SENT: " + message);
+            websocket.send(message);
         }
         function writeToScreen(message) {
             var pre = document.createElement("p");

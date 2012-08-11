@@ -12,7 +12,8 @@ namespace SimpleOwinAspNetHost
     {
         protected void Application_Start(object sender, EventArgs e)
         {
-            RouteTable.Routes.Add(new Route("{*pathInfo}", new SimpleOwinAspNetRouteHandler(new Helloworld().OwinApp)));
+            RouteTable.Routes.Add(new Route("helloworld", new SimpleOwinAspNetRouteHandler(new Helloworld().OwinApp)));
+            RouteTable.Routes.Add(new Route("websocket/helloworld", new SimpleOwinAspNetRouteHandler(new WebSocketHelloworld().OwinApp)));
         }
     }
 }
