@@ -340,6 +340,16 @@ namespace SimpleOwinAspNetHost
             }
         }
 
+        public static IDictionary<string, object> GetStartupProperties()
+        {
+            var properties = new Dictionary<string, object>(StringComparer.OrdinalIgnoreCase);
+            properties[OwinConstants.Version] = "1.0";
+#if ASPNET_WEBSOCKETS
+            properties[OwinConstants.WebSocketSupport] = "WebSocketFunc";
+#endif
+            return properties;
+        }
+
 #if ASPNET_WEBSOCKETS
 
         private static WebSocketSendAsync WebSocketSendAsync(WebSocket webSocket)
