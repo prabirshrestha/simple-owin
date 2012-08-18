@@ -122,7 +122,7 @@ namespace SimpleOwinAspNetHost
     public class SimpleOwinAspNetHandler : IHttpAsyncHandler
     {
         private readonly AppAction _app;
-        private string _root;
+        private readonly string _root;
 
         public SimpleOwinAspNetHandler()
             : this(null)
