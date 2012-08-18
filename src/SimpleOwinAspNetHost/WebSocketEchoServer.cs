@@ -189,7 +189,7 @@ namespace SimpleOwinAspNetHost
                         }
                     };
 
-                owinResponseProperties["websocket.BodyFunc"] = webSocketBody;
+                owinResponseProperties["websocket.Func"] = webSocketBody;
             }
             else
 #endif

@@ -170,7 +170,7 @@ namespace SimpleOwinAspNetHost
                         await closeAsync((int)WebSocketCloseStatus.NormalClosure, "Closing", CancellationToken.None);
                     };
 
-                owinResponseProperties["websocket.BodyFunc"] = webSocketBody;
+                owinResponseProperties["websocket.Func"] = webSocketBody;
             }
             else
 #endif

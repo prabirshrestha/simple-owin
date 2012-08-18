@@ -103,8 +103,14 @@ namespace SimpleOwinAspNetHost
         private readonly SimpleOwinAspNetHandler _simpleOwinAspNetHandler;
 
         public SimpleOwinAspNetRouteHandler(AppAction app)
+            : this(app, null)
         {
             _simpleOwinAspNetHandler = new SimpleOwinAspNetHandler(app);
+        }
+
+        public SimpleOwinAspNetRouteHandler(AppAction app, string root)
+        {
+            _simpleOwinAspNetHandler = new SimpleOwinAspNetHandler(app, root);
         }
 
         public IHttpHandler GetHttpHandler(RequestContext requestContext)
@@ -116,6 +122,7 @@ namespace SimpleOwinAspNetHost
     public class SimpleOwinAspNetHandler : IHttpAsyncHandler
     {
         private readonly AppAction _app;
+        private string _root;
 
         public SimpleOwinAspNetHandler()
             : this(null)
@@ -123,6 +130,11 @@ namespace SimpleOwinAspNetHost
         }
 
         public SimpleOwinAspNetHandler(AppAction app)
+            : this(app, null)
+        {
+        }
+
+        public SimpleOwinAspNetHandler(AppAction app, string root)
         {
             if (app == null)
             {
@@ -131,6 +143,11 @@ namespace SimpleOwinAspNetHost
             }
 
             _app = app;
+            if (!string.IsNullOrEmpty(root))
+            {
+                if (!root.StartsWith("/"))
+                    _root += "/" + root;
+            }
         }
 
         public void ProcessRequest(HttpContext context)
@@ -161,6 +178,9 @@ namespace SimpleOwinAspNetHost
             if (pathBase == "/" || pathBase == null)
                 pathBase = "";
 
+            if (_root != null)
+                pathBase += _root;
+
             var path = request.Path;
             if (path.StartsWith(pathBase))
                 path = path.Substring(pathBase.Length);
@@ -182,7 +202,7 @@ namespace SimpleOwinAspNetHost
 
 #if ASPNET_WEBSOCKETS
             if (context.IsWebSocketRequest)
-                env[OwinConstants.WebSocketSupport] = new[] { "WebSocket" };
+                env[OwinConstants.WebSocketSupport] = "WebSocket";
 #endif
 
             foreach (var kv in serverVarsToAddToEnv)
@@ -331,15 +351,15 @@ namespace SimpleOwinAspNetHost
         private static WebSocketReceiveAsync WebSocketReceiveAsync(WebSocket webSocket)
         {
             return async (buffer, cancel) =>
-                {
-                    var nativeResult = await webSocket.ReceiveAsync(buffer, cancel);
-                    return new WebSocketReceiveResultTuple(
-                        EnumToOpCode(nativeResult.MessageType),
-                        nativeResult.EndOfMessage,
-                        (nativeResult.MessageType == WebSocketMessageType.Close ? null : (int?)nativeResult.Count),
-                        (int?)nativeResult.CloseStatus,
-                        nativeResult.CloseStatusDescription);
-                };
+            {
+                var nativeResult = await webSocket.ReceiveAsync(buffer, cancel);
+                return new WebSocketReceiveResultTuple(
+                    EnumToOpCode(nativeResult.MessageType),
+                    nativeResult.EndOfMessage,
+                    (nativeResult.MessageType == WebSocketMessageType.Close ? null : (int?)nativeResult.Count),
+                    (int?)nativeResult.CloseStatus,
+                    nativeResult.CloseStatusDescription);
+            };
         }
 
         private static WebSocketCloseAsync WebSocketCloseAsync(WebSocket webSocket)
@@ -387,7 +407,7 @@ namespace SimpleOwinAspNetHost
             public const string CallCompleted = "owin.CallCompleted";
 
             public const string WebSocketSupport = "websocket.Support";
-            public const string WebSocketBodyDelegte = "websocket.BodyFunc";
+            public const string WebSocketBodyDelegte = "websocket.Func";
         }
     }
 }
