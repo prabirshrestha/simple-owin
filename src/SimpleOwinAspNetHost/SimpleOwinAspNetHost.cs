@@ -202,7 +202,7 @@ namespace SimpleOwinAspNetHost
 
 #if ASPNET_WEBSOCKETS
             if (context.IsWebSocketRequest)
-                env[OwinConstants.WebSocketSupport] = "WebSocket";
+                env[OwinConstants.WebSocketSupport] = "WebSocketFunc";
 #endif
 
             foreach (var kv in serverVarsToAddToEnv)

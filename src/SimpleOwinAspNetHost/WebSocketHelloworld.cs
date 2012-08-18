@@ -141,9 +141,9 @@ namespace SimpleOwinAspNetHost
 
 #if ASPNET_WEBSOCKETS
 
-            var webSocketSupport = Get<string[]>(environment, "websocket.Support");
+            var webSocketSupport = Get<string>(environment, "websocket.Support");
 
-            if (webSocketSupport != null && webSocketSupport.Contains("WebSocket"))
+            if (webSocketSupport != null && webSocketSupport.Contains("WebSocketFunc"))
             {
                 // supports web sockets
                 owinResponseStatus = 101;
