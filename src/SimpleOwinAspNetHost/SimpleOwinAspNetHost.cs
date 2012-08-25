@@ -13,6 +13,8 @@ namespace SimpleOwinAspNetHost
     using System.Web;
     using System.Web.Routing;
 
+    using AppFunc = System.Func<System.Collections.Generic.IDictionary<string, object>, System.Threading.Tasks.Task>;
+
     using AppAction = System.Func< // Call
             System.Collections.Generic.IDictionary<string, object>, // Environment
             System.Collections.Generic.IDictionary<string, string[]>, // Headers
