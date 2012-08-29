@@ -58,18 +58,10 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="index.html" />
-    <Content Include="WebSocketEchoServer.html" />
-    <Content Include="WebSocketEchoServerPureHttpHandler.html" />
     <Content Include="Global.asax" />
     <Content Include="Web.config" />
-    <Content Include="websocket.html" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="WebSocketEchoServer.cs" />
-    <Compile Include="WebSocketEchoServerPureHttpHandler.ashx.cs">
-      <DependentUpon>WebSocketEchoServerPureHttpHandler.ashx</DependentUpon>
-    </Compile>
-    <Compile Include="WebSocketHelloworld.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
@@ -86,9 +78,6 @@
     <Content Include="Web.Release.config">
       <DependentUpon>Web.config</DependentUpon>
     </Content>
-  </ItemGroup>
-  <ItemGroup>
-    <Content Include="WebSocketEchoServerPureHttpHandler.ashx" />
   </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>
