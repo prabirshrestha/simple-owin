@@ -3,8 +3,10 @@ namespace SimpleOwinAspNetHost
 {
     using System;
     using System.Collections.Generic;
+    using System.Diagnostics;
     using System.IO;
     using System.Linq;
+    using System.Threading;
     using System.Threading.Tasks;
     using System.Web;
     using System.Web.Routing;
@@ -102,12 +104,12 @@ namespace SimpleOwinAspNetHost
             env[OwinConstants.RequestQueryString] = request.ServerVariables["QUERY_STRING"];
             env[OwinConstants.RequestProtocol] = request.ServerVariables["SERVER_PROTOCOL"];
             env[OwinConstants.RequestBody] = request.InputStream;
-
             env[OwinConstants.RequestHeaders] = request.Headers.AllKeys
                     .ToDictionary(x => x, x => request.Headers.GetValues(x), StringComparer.OrdinalIgnoreCase);
 
-            env[OwinConstants.ResponseHeaders] = new Dictionary<string, string[]>();
-            response.BufferOutput = false;
+            env[OwinConstants.CallCancelled] = CancellationToken.None;
+
+            env[OwinConstants.ResponseHeaders] = new Dictionary<string, string[]>(StringComparer.OrdinalIgnoreCase);
             env[OwinConstants.ResponseBody] =
                 new TriggerStream(response.OutputStream)
                     {
@@ -131,12 +133,11 @@ namespace SimpleOwinAspNetHost
                                            }
                     };
 
-            env[OwinConstants.CallCompleted] = tcs.Task;
-
-            foreach (var kv in serverVarsToAddToEnv)
-                env["server." + kv.Key] = kv.Value;
+            SetEnvironmentServerVariables(env, serverVarsToAddToEnv);
 
             env["aspnet.HttpContextBase"] = context;
+
+            response.BufferOutput = false;
 
             try
             {
@@ -170,6 +171,13 @@ namespace SimpleOwinAspNetHost
             }
         }
 
+        [DebuggerStepThrough]
+        private static void SetEnvironmentServerVariables(Dictionary<string, object> env, IEnumerable<KeyValuePair<string, object>> serverVarsToAddToEnv)
+        {
+            foreach (var kv in serverVarsToAddToEnv)
+                env["server." + kv.Key] = kv.Value;
+        }
+
         private static T Get<T>(IDictionary<string, object> env, string key, T defaultValue)
         {
             object value;
@@ -196,7 +204,7 @@ namespace SimpleOwinAspNetHost
             public const string RequestHeaders = "owin.RequestHeaders";
             public const string RequestBody = "owin.RequestBody";
 
-            public const string CallCompleted = "owin.CallCompleted";
+            public const string CallCancelled = "owin.CallCancelled";
 
             public const string ResponseStatusCode = "owin.ResponseStatusCode";
             public const string ResponseReasonPhrase = "owin.ResponseReasonPhrase";
@@ -207,6 +215,7 @@ namespace SimpleOwinAspNetHost
             public const string WebSocketBodyDelegte = "websocket.Func";
         }
 
+        /// <remarks>TriggerStream pulled from Gate source code.</remarks>
         private class TriggerStream : Stream
         {
             public TriggerStream(Stream innerStream)
@@ -215,6 +224,7 @@ namespace SimpleOwinAspNetHost
             }
 
             public Stream InnerStream { get; set; }
+
             public Action OnFirstWrite { get; set; }
 
             private bool IsStarted { get; set; }

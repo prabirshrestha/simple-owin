@@ -3,7 +3,6 @@ namespace SimpleOwinAspNetHost.Samples
 {
     using System;
     using System.Collections.Generic;
-    using System.Globalization;
     using System.IO;
     using System.Linq;
     using System.Text;
@@ -39,7 +38,7 @@ namespace SimpleOwinAspNetHost.Samples
                            var owinRequestPath = Get<string>(env, "owin.RequestPath");
                            var owinRequestQueryString = Get<string>(env, "owin.RequestQueryString");
                            var serverClientIp = Get<string>(env, "server.CLIENT_IP");
-                           var callCompleted = Get<Task>(env, "owin.CallCompleted");
+                           var callCancelled = Get<Task>(env, "owin.CallCancelled");
 
                            var uriHostName = GetHeader(owinRequestHeaders, "Host");
                            var uri = string.Format("{0}://{1}{2}{3}{4}{5}", owinRequestScheme, uriHostName,
