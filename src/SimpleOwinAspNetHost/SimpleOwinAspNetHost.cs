@@ -1,5 +1,7 @@
 ﻿//#define ASPNET_WEBSOCKETS
 
+// https://github.com/prabirshrestha/simple-owin
+
 namespace SimpleOwinAspNetHost
 {
     using System;
