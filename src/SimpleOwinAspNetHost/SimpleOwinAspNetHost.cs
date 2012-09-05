@@ -92,6 +92,16 @@ namespace SimpleOwinAspNetHost
             _simpleOwinAspNetHandler = new SimpleOwinAspNetHandler(app, root);
         }
 
+        public SimpleOwinAspNetRouteHandler(IEnumerable<Func<AppFunc, AppFunc>> app)
+            : this(app, null)
+        {
+        }
+
+        public SimpleOwinAspNetRouteHandler(IEnumerable<Func<AppFunc, AppFunc>> app, string root)
+        {
+            _simpleOwinAspNetHandler = new SimpleOwinAspNetHandler(app, root);
+        }
+
         public IHttpHandler GetHttpHandler(RequestContext requestContext)
         {
             return _simpleOwinAspNetHandler;
@@ -102,6 +112,15 @@ namespace SimpleOwinAspNetHost
     {
         private readonly AppFunc _appFunc;
         private readonly string _root;
+
+        private static readonly Task CompletedTask;
+
+        static SimpleOwinAspNetHandler()
+        {
+            var tcs = new TaskCompletionSource<int>();
+            tcs.TrySetResult(0);
+            CompletedTask = tcs.Task;
+        }
 
         public SimpleOwinAspNetHandler(AppFunc app)
             : this(app, null)
@@ -119,6 +138,42 @@ namespace SimpleOwinAspNetHost
                 if (!root.StartsWith("/"))
                     _root += "/" + root;
             }
+        }
+
+        public SimpleOwinAspNetHandler(IEnumerable<Func<AppFunc, AppFunc>> apps)
+            : this(apps, null)
+        {
+        }
+
+        public SimpleOwinAspNetHandler(IEnumerable<Func<AppFunc, AppFunc>> apps, string root)
+            : this(ConvertApp(apps), root)
+        {
+        }
+
+        public static AppFunc ConvertApp(IEnumerable<Func<AppFunc, AppFunc>> apps)
+        {
+            if (apps == null)
+                throw new ArgumentNullException("apps");
+
+            var appList = apps.ToList();
+
+            return
+                env =>
+                {
+                    AppFunc next = null;
+                    int index = 0;
+
+                    next = env2 =>
+                    {
+                        if (index == appList.Count)
+                            return CompletedTask; // we are done
+
+                        Func<AppFunc, AppFunc> other = appList[index++];
+                        return other(env3 => next(env3))(env2);
+                    };
+
+                    return next(env);
+                };
         }
 
         public void ProcessRequest(HttpContext context)

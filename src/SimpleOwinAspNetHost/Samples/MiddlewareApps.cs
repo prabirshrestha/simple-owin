@@ -4,6 +4,7 @@ namespace SimpleOwinAspNetHost.Samples
     using System;
     using System.Collections.Generic;
     using System.IO;
+    using System.Linq;
     using System.Text;
     using System.Threading.Tasks;
 
@@ -82,7 +83,7 @@ namespace SimpleOwinAspNetHost.Samples
             };
         }
 
-        public static AppFunc OwinApp()
+        public static IEnumerable<Func<AppFunc, AppFunc>> OwinApps()
         {
             var app = new List<Func<AppFunc, AppFunc>>();
             app.Add(Middleware1);
@@ -90,6 +91,14 @@ namespace SimpleOwinAspNetHost.Samples
             app.Add(Middleware3WithConfig(message: "response from ", moreMessage: " middleware 3 with config<br/>"));
             app.Add(Middleware4);
             app.Add(Middleware5);
+
+            return app;
+        }
+
+        public static AppFunc OwinApp()
+        {
+            var apps = OwinApps().ToList();
+            // return SimpleOwinAspNetHandler.ConvertApp(apps);
 
             return
                 env =>
@@ -99,10 +108,10 @@ namespace SimpleOwinAspNetHost.Samples
 
                     next = env2 =>
                                {
-                                   if (index == app.Count)
+                                   if (index == apps.Count)
                                        return CachedCompletedResultTupleTask; // we are done
 
-                                   Func<AppFunc, AppFunc> other = app[index++];
+                                   Func<AppFunc, AppFunc> other = apps[index++];
                                    return other(env3 => next(env3))(env2);
                                };
 
