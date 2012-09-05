@@ -1,4 +1,4 @@
-﻿#define ASPNET_WEBSOCKETS
+﻿//#define ASPNET_WEBSOCKETS
 
 namespace SimpleOwinAspNetHost
 {
@@ -175,12 +175,16 @@ namespace SimpleOwinAspNetHost
             env[OwinConstants.CallCancelled] = CancellationToken.None;
 
             env[OwinConstants.ResponseHeaders] = new Dictionary<string, string[]>(StringComparer.OrdinalIgnoreCase);
+
+            bool isWebSocketRequest = false;
+
             env[OwinConstants.ResponseBody] =
                 new TriggerStream(response.OutputStream)
                     {
                         OnFirstWrite = () =>
                                            {
                                                response.StatusCode = Get<int>(env, OwinConstants.ResponseStatusCode, 200);
+                                               isWebSocketRequest = response.StatusCode == 101;
 
                                                object reasonPhrase;
                                                if (env.TryGetValue(OwinConstants.ResponseReasonPhrase, out reasonPhrase))
@@ -216,7 +220,45 @@ namespace SimpleOwinAspNetHost
                                       {
                                           if (t.IsFaulted) tcs.TrySetException(t.Exception.InnerExceptions);
                                           else if (t.IsCanceled) tcs.TrySetCanceled();
-                                          else tcs.TrySetResult(() => { });
+                                          else
+                                          {
+#if ASPNET_WEBSOCKETS
+                                               object tempWsBodyDelegate;
+                                               if (isWebSocketRequest &&
+                                                   env.TryGetValue(OwinConstants.WebSocketBodyDelegte, out tempWsBodyDelegate) &&
+                                                   tempWsBodyDelegate != null)
+                                               {
+                                                   var wsBodyDelegate = (WebSocketAction)tempWsBodyDelegate;
+                                                   context.AcceptWebSocketRequest(async websocketContext =>
+                                                   {
+                                                       env["aspnet.AspNetWebSocketContext"] = websocketContext;
+                                                       var webSocket = websocketContext.WebSocket;
+
+                                                       await wsBodyDelegate(WebSocketSendAsync(webSocket), WebSocketReceiveAsync(webSocket), WebSocketCloseAsync(webSocket));
+
+                                                       switch (webSocket.State)
+                                                       {
+                                                           case WebSocketState.Closed:  // closed gracefully, no action needed
+                                                           case WebSocketState.Aborted: // closed abortively, no action needed
+                                                               break;
+                                                           case WebSocketState.CloseReceived:
+                                                               await webSocket.CloseAsync(WebSocketCloseStatus.NormalClosure, string.Empty, CancellationToken.None);
+                                                               break;
+                                                           case WebSocketState.Open:
+                                                           case WebSocketState.CloseSent: // No close received, abort so we don't have to drain the pipe.
+                                                               websocketContext.WebSocket.Abort();
+                                                               break;
+                                                           default:
+                                                               throw new ArgumentOutOfRangeException("state", webSocket.State, string.Empty);
+                                                       }
+
+                                                       response.Close();
+                                                   });
+                                               }
+#endif
+                                                tcs.TrySetResult(() => { });
+                                          }
+                                              
                                       });
             }
             catch (Exception ex)
@@ -314,7 +356,7 @@ namespace SimpleOwinAspNetHost
         }
 
 #endif
-        
+
         private static class OwinConstants
         {
             public const string Version = "owin.Version";

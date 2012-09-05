@@ -59,6 +59,7 @@
   <ItemGroup>
     <Content Include="index.html" />
     <Content Include="Global.asax" />
+    <Content Include="Samples\WebSockets\Helloworld\index.html" />
     <Content Include="Web.config" />
   </ItemGroup>
   <ItemGroup>
@@ -67,6 +68,7 @@
     </Compile>
     <Compile Include="Samples\Helloworld.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Samples\WebSockets\Helloworld\HelloWorldWebSocket.cs" />
     <Compile Include="SimpleOwinAspNetHost.cs" />
   </ItemGroup>
   <ItemGroup>
