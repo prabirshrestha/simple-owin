@@ -92,14 +92,14 @@ namespace SimpleOwinAspNetHost
             _simpleOwinAspNetHandler = new SimpleOwinAspNetHandler(app, root);
         }
 
-        public SimpleOwinAspNetRouteHandler(IEnumerable<Func<AppFunc, AppFunc>> app)
-            : this(app, null)
+        public SimpleOwinAspNetRouteHandler(IEnumerable<Func<AppFunc, AppFunc>> apps)
+            : this(apps, null)
         {
         }
 
-        public SimpleOwinAspNetRouteHandler(IEnumerable<Func<AppFunc, AppFunc>> app, string root)
+        public SimpleOwinAspNetRouteHandler(IEnumerable<Func<AppFunc, AppFunc>> apps, string root)
         {
-            _simpleOwinAspNetHandler = new SimpleOwinAspNetHandler(app, root);
+            _simpleOwinAspNetHandler = new SimpleOwinAspNetHandler(apps, root);
         }
 
         public IHttpHandler GetHttpHandler(RequestContext requestContext)
