@@ -66,6 +66,7 @@
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
+    <Compile Include="Samples\MiddlewareApps.cs" />
     <Compile Include="Samples\Helloworld.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Samples\WebSockets\Helloworld\HelloWorldWebSocket.cs" />
