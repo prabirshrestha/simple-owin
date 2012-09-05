@@ -202,6 +202,11 @@ namespace SimpleOwinAspNetHost
 
             env["aspnet.HttpContextBase"] = context;
 
+#if ASPNET_WEBSOCKETS
+            if (context.IsWebSocketRequest)
+                env[OwinConstants.WebSocketSupport] = "WebSocketFunc";
+#endif
+
             response.BufferOutput = false;
 
             try
