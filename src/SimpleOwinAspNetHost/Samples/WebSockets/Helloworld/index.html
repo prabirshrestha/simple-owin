@@ -7,17 +7,17 @@
     <script>
         //var wsUri = "ws://echo.websocket.org/";
         var wsUri = "ws://localhost/SimpleOwinAspNetHost/websocket/helloworld";
-        var output;
+        var output, websocket;
         function init() {
             output = document.getElementById("output");
             testWebSocket();
         }
         function testWebSocket() {
             websocket = new WebSocket(wsUri);
-            websocket.onopen = function (evt) { onOpen(evt) };
-            websocket.onclose = function (evt) { onClose(evt) };
-            websocket.onmessage = function (evt) { onMessage(evt) };
-            websocket.onerror = function (evt) { onError(evt) };
+            websocket.onopen = function (evt) { onOpen(evt); };
+            websocket.onclose = function (evt) { onClose(evt); };
+            websocket.onmessage = function (evt) { onMessage(evt); };
+            websocket.onerror = function (evt) { onError(evt); };
         }
         function onOpen(evt) {
             writeToScreen("CONNECTED");
