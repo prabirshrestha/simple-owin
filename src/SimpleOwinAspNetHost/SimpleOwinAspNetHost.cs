@@ -256,6 +256,60 @@ namespace SimpleOwinAspNetHost
             return properties;
         }
 
+#if ASPNET_WEBSOCKETS
+
+        private static WebSocketSendAsync WebSocketSendAsync(WebSocket webSocket)
+        {
+            return (buffer, messageType, endOfMessage, cancel) =>
+                webSocket.SendAsync(buffer, OpCodeToEnum(messageType), endOfMessage, cancel);
+        }
+
+        private static WebSocketReceiveAsync WebSocketReceiveAsync(WebSocket webSocket)
+        {
+            return async (buffer, cancel) =>
+            {
+                var nativeResult = await webSocket.ReceiveAsync(buffer, cancel);
+                return new WebSocketReceiveResultTuple(
+                    EnumToOpCode(nativeResult.MessageType),
+                    nativeResult.EndOfMessage,
+                    (nativeResult.MessageType == WebSocketMessageType.Close ? null : (int?)nativeResult.Count),
+                    (int?)nativeResult.CloseStatus,
+                    nativeResult.CloseStatusDescription);
+            };
+        }
+
+        private static WebSocketCloseAsync WebSocketCloseAsync(WebSocket webSocket)
+        {
+            return (status, description, cancel) =>
+                webSocket.CloseOutputAsync((WebSocketCloseStatus)status, description, cancel);
+        }
+
+        private static WebSocketMessageType OpCodeToEnum(int messageType)
+        {
+            switch (messageType)
+            {
+                case 0x1: return WebSocketMessageType.Text;
+                case 0x2: return WebSocketMessageType.Binary;
+                case 0x8: return WebSocketMessageType.Close;
+                default:
+                    throw new ArgumentOutOfRangeException("messageType", messageType, string.Empty);
+            }
+        }
+
+        private static int EnumToOpCode(WebSocketMessageType webSocketMessageType)
+        {
+            switch (webSocketMessageType)
+            {
+                case WebSocketMessageType.Text: return 0x1;
+                case WebSocketMessageType.Binary: return 0x2;
+                case WebSocketMessageType.Close: return 0x8;
+                default:
+                    throw new ArgumentOutOfRangeException("webSocketMessageType", webSocketMessageType, string.Empty);
+            }
+        }
+
+#endif
+        
         private static class OwinConstants
         {
             public const string Version = "owin.Version";
