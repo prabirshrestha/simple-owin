@@ -116,8 +116,6 @@ namespace SimpleOwinAspNetHost.Samples.WebSockets.Helloworld
                     };
 
                     env["websocket.Func"] = webSocketBody;
-
-                    responseBody.Flush();
                 }
                 else
                 {
