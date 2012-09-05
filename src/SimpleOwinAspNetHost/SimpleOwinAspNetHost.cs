@@ -1,4 +1,5 @@
-﻿
+﻿#define ASPNET_WEBSOCKETS
+
 namespace SimpleOwinAspNetHost
 {
     using System;
@@ -6,12 +7,76 @@ namespace SimpleOwinAspNetHost
     using System.Diagnostics;
     using System.IO;
     using System.Linq;
+#if ASPNET_WEBSOCKETS
+    using System.Net.WebSockets;
+#endif
     using System.Threading;
     using System.Threading.Tasks;
     using System.Web;
     using System.Web.Routing;
 
     using AppFunc = System.Func<System.Collections.Generic.IDictionary<string, object>, System.Threading.Tasks.Task>;
+
+#if ASPNET_WEBSOCKETS
+
+    using WebSocketSendAsync = System.Func<
+                System.ArraySegment<byte>, // data
+                int, // message type
+                bool, // end of message
+                System.Threading.CancellationToken, // cancel
+                System.Threading.Tasks.Task>;
+
+    using WebSocketReceiveResultTuple = System.Tuple<
+                        int, // messageType
+                        bool, // endOfMessage
+                        int?, // count
+                        int?, // closeStatus
+                        string>; // closeStatusDescription
+
+    using WebSocketReceiveAsync = System.Func<
+                System.ArraySegment<byte>, // data
+                System.Threading.CancellationToken, // cancel
+                System.Threading.Tasks.Task<
+                    System.Tuple<
+                        int, // messageType
+                        bool, // endOfMessage
+                        int?, // count
+                        int?, // closeStatus
+                        string>>>; // closeStatusDescription
+
+    using WebSocketCloseAsync = System.Func<
+                int, // closeStatus
+                string, // closeDescription
+                System.Threading.CancellationToken, // cancel
+                System.Threading.Tasks.Task>;
+
+#pragma warning disable 811
+    using WebSocketAction = System.Func<
+            System.Func< // WebSocketSendAsync 
+                System.ArraySegment<byte>, // data
+                int, // message type
+                bool, // end of message
+                System.Threading.CancellationToken, // cancel
+                System.Threading.Tasks.Task>,
+            System.Func< // WebSocketReceiveAsync
+                System.ArraySegment<byte>, // data
+                System.Threading.CancellationToken, // cancel
+                System.Threading.Tasks.Task<
+                    System.Tuple<
+                        int, // messageType
+                        bool, // endOfMessage
+                        int?, // count
+                        int?, // closeStatus
+                        string>>>, // closeStatusDescription
+             System.Func< // WebSocketCloseAsync
+                int, // closeStatus
+                string, // closeDescription
+                System.Threading.CancellationToken, // cancel
+                System.Threading.Tasks.Task>,
+            System.Threading.Tasks.Task>; // complete
+#pragma warning restore 811
+
+#endif
 
     public class SimpleOwinAspNetRouteHandler : IRouteHandler
     {
