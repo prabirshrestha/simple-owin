@@ -24,6 +24,11 @@
             return env.GetOwinEnvironmentValue<string>("owin.RequestMethod");
         }
 
+        public static string GetOwinRequestScheme(this IDictionary<string, object> env)
+        {
+            return env.GetOwinEnvironmentValue<string>("owin.RequestScheme");
+        }
+
         public static IDictionary<string, string[]> GetOwinResponseHeaders(this IDictionary<string, object> env)
         {
             return env.GetOwinEnvironmentValue<IDictionary<string, string[]>>("owin.ResponseHeaders");
