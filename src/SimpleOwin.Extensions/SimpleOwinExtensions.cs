@@ -49,6 +49,11 @@
             return env.GetOwinEnvironmentValue<string>("owin.CallCancelled");
         }
 
+        public static string GetOwinServerClientIp(this IDictionary<string, object> env)
+        {
+            return env.GetOwinEnvironmentValue<string>("server.CLIENT_IP");
+        }
+
         public static IDictionary<string, string[]> GetOwinRequesteHeaders(this IDictionary<string, object> env)
         {
             return env.GetOwinEnvironmentValue<IDictionary<string, string[]>>("owin.RequestHeaders");
