@@ -1,7 +1,7 @@
 ﻿namespace SimpleOwin.Middlewares
 {
     using System;
-    using SimpleOwin.Middlewares.Extensions;
+    using SimpleOwin.Extensions;
 
     using AppFunc = System.Func<System.Collections.Generic.IDictionary<string, object>, System.Threading.Tasks.Task>;
 

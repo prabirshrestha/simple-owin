@@ -24,6 +24,12 @@
             return env.GetOwinEnvironmentValue<string>("owin.RequestMethod");
         }
 
+        public static IDictionary<string, object> SetOwinRequestMethod(this IDictionary<string, object> env, string method)
+        {
+            env["owin.RequestMethod"] = method;
+            return env;
+        }
+
         public static string GetOwinRequestScheme(this IDictionary<string, object> env)
         {
             return env.GetOwinEnvironmentValue<string>("owin.RequestScheme");
@@ -91,28 +97,74 @@
             return env;
         }
 
-        public static IDictionary<string, string[]> SetOwinHeader(this IDictionary<string, string[]> headers, string key, string[] value)
+        public static IDictionary<string, string[]> SetOwinHeader(this IDictionary<string, string[]> headers, string name, string[] value)
         {
-            headers[key] = value;
+            headers[name] = value;
             return headers;
         }
 
-        public static IDictionary<string, string[]> SetOwinHeader(this IDictionary<string, string[]> headers, string key, string value)
+        public static IDictionary<string, string[]> SetOwinHeader(this IDictionary<string, string[]> headers, string name, string value)
         {
-            headers[key] = new[] { value };
+            headers[name] = new[] { value };
             return headers;
         }
 
-        public static string[] GetOwinHeader(IDictionary<string, string[]> headers, string key, string[] defaultValue = null)
+        public static string[] GetOwinHeaderValues(this IDictionary<string, string[]> headers, string name, string[] defaultValue = null)
         {
             string[] values;
-            return headers.TryGetValue(key, out values) ? values : defaultValue;
+            return headers.TryGetValue(name, out values) ? values : defaultValue;
         }
 
-        public static T GetOwinEnvironmentValue<T>(this IDictionary<string, object> env, string key, T defaultValue = default(T))
+        public static string GetOwinHeaderValue(this IDictionary<string, string[]> headers, string name)
+        {
+            var values = headers.GetOwinHeaderValues(name);
+
+            if (values == null)
+                return null;
+
+            switch (values.Length)
+            {
+                case 0:
+                    return string.Empty;
+                case 1:
+                    return values[0];
+                default:
+                    return string.Join(",", values);
+            }
+        }
+
+        public static string[] GetOwinRequestHeaderValues(this IDictionary<string, object> env, string name, string[] defaultValue = null)
+        {
+            return env
+                .GetOwinRequesteHeaders()
+                .GetOwinHeaderValues(name, defaultValue);
+        }
+
+        public static string GetOwinRequestHeaderValue(this IDictionary<string, object> env, string name)
+        {
+            return env
+                .GetOwinRequesteHeaders()
+                .GetOwinHeaderValue(name);
+        }
+
+        public static string[] GetOwinResponseHeaderValues(this IDictionary<string, object> env, string name, string[] defaultValue = null)
+        {
+            return env
+                .GetOwinResponseHeaders()
+                .GetOwinHeaderValues(name, defaultValue);
+        }
+
+        public static string GetOwinResponseHeaderValue(this IDictionary<string, object> env, string name)
+        {
+            return env
+                .GetOwinResponseHeaders()
+                .GetOwinHeaderValue(name);
+        }
+
+        public static T GetOwinEnvironmentValue<T>(this IDictionary<string, object> env, string name, T defaultValue = default(T))
         {
             object value;
-            return env.TryGetValue(key, out value) && value is T ? (T)value : defaultValue;
+            return env.TryGetValue(name, out value) && value is T ? (T)value : defaultValue;
         }
 
         public static AppFunc ToOwinAppFunc(this IEnumerable<Func<AppFunc, AppFunc>> app)

@@ -12,6 +12,8 @@
         public static AppFunc OwinApp()
         {
             var app = new List<Func<AppFunc, AppFunc>>();
+
+            app.Add(MethodOverride.Middleware());
             app.Add(NotFound.Middleware());
 
             return app.ToOwinAppFunc();
