@@ -8,7 +8,7 @@ namespace SimpleOwin.Middlewares.Router
 
     using AppFunc = System.Func<System.Collections.Generic.IDictionary<string, object>, System.Threading.Tasks.Task>;
 
-    public class Router
+    public class Router : IRouter
     {
         private readonly bool _ignoreCase;
         private readonly ICollection<Func<AppFunc, AppFunc>> _routes;
@@ -35,6 +35,14 @@ namespace SimpleOwin.Middlewares.Router
                 route = "(.)*";
 
             return new Regex(route, _defaultRegexOptions);
+        }
+
+        public void All(Func<AppFunc, AppFunc> callback)
+        {
+            if (callback == null)
+                throw new ArgumentNullException("callback");
+
+            _routes.Add(callback);
         }
 
         public void All(string route, Func<AppFunc, AppFunc> callback)

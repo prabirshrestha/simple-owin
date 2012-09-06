@@ -40,7 +40,6 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="IRouter.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Router.cs" />
   </ItemGroup>
@@ -49,6 +48,10 @@
     <ProjectReference Include="..\SimpleOwin.Extensions\SimpleOwin.Extensions.csproj">
       <Project>{2f690547-7149-4c5d-aadf-98811575aa35}</Project>
       <Name>SimpleOwin.Extensions</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\SimpleOwin.Middlewares\SimpleOwin.Middlewares.csproj">
+      <Project>{E20EBBDB-A96E-4F1B-9324-B474FFA570DB}</Project>
+      <Name>SimpleOwin.Middlewares</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
