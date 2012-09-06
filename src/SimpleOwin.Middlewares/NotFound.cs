@@ -2,7 +2,7 @@
 {
     using System;
     using System.Text;
-    using SimpleOwin.Middlewares.Extensions;
+    using SimpleOwin.Extensions;
 
     using AppFunc = System.Func<System.Collections.Generic.IDictionary<string, object>, System.Threading.Tasks.Task>;
 
@@ -16,7 +16,7 @@
 
             return
                 next =>
-                async env =>
+                env =>
                 {
                     env
                         .SetOwinResponseStatusCode(404)
@@ -26,11 +26,11 @@
                                                             headers.SetOwinHeader("Content-Type", contentType);
                                                     });
 
-                    await env
+                    env
                         .GetOwinResponseBody()
-                        .WriteAsync(data, 0, data.Length);
+                        .Write(data, 0, data.Length);
 
-                    await next(env);
+                    return next(env);
                 };
         }
     }

@@ -2,8 +2,8 @@
 {
     using System;
     using System.Collections.Generic;
+    using SimpleOwin.Extensions;
     using SimpleOwin.Middlewares;
-    using SimpleOwin.Middlewares.Extensions;
 
     using AppFunc = System.Func<System.Collections.Generic.IDictionary<string, object>, System.Threading.Tasks.Task>;
 

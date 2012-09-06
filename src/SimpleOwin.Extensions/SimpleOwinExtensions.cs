@@ -111,7 +111,11 @@
 
         public static AppFunc ToOwinAppFunc(this IEnumerable<Func<AppFunc, AppFunc>> app)
         {
-            var apps = app.ToList();
+            var enumerable = app as Func<AppFunc, AppFunc>[] ?? app.ToArray();
+            var apps = enumerable.ToList();
+
+            if (!enumerable.Any())
+                throw new ArgumentException("IEnumerable<Func<AppFunc, AppFunc>> should contain at least one app.");
 
             return
                 env =>
@@ -121,12 +125,10 @@
 
                     next = env2 =>
                     {
-                        if (index == apps.Count)
-                            return CachedCompletedResultTupleTask; // we are done
-
                         Func<AppFunc, AppFunc> other = apps[index++];
+
                         // ReSharper disable AccessToModifiedClosure
-                        return other(env3 => next(env3))(env2);
+                        return index == apps.Count ? other(env3 => CachedCompletedResultTupleTask)(env2) : other(env3 => next(env3))(env2);
                         // ReSharper restore AccessToModifiedClosure
                     };
 
