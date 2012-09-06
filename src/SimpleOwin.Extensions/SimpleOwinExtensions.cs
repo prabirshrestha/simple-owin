@@ -198,5 +198,14 @@
                     return next(env);
                 };
         }
+
+        public static ICollection<Func<AppFunc, AppFunc>> SimpleOwinAddIf(this ICollection<Func<AppFunc, AppFunc>> apps, Func<IDictionary<string, object>, bool> condition, Func<AppFunc, AppFunc> callback)
+        {
+            if (callback == null)
+                throw new ArgumentNullException("callback");
+
+            apps.Add(next => env => condition(env) ? callback(next)(env) : next(env));
+            return apps;
+        }
     }
 }

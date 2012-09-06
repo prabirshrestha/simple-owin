@@ -91,6 +91,10 @@
       <Project>{2F690547-7149-4C5D-AADF-98811575AA35}</Project>
       <Name>SimpleOwin.Extensions</Name>
     </ProjectReference>
+    <ProjectReference Include="..\SimpleOwin.Middlewares.Router\SimpleOwin.Middlewares.Router.csproj">
+      <Project>{E3B161E8-3F53-453A-9D87-EB25B3927363}</Project>
+      <Name>SimpleOwin.Middlewares.Router</Name>
+    </ProjectReference>
     <ProjectReference Include="..\SimpleOwin.Middlewares\SimpleOwin.Middlewares.csproj">
       <Project>{e20ebbdb-a96e-4f1b-9324-b474ffa570db}</Project>
       <Name>SimpleOwin.Middlewares</Name>
