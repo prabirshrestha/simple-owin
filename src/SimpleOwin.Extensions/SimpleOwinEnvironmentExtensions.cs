@@ -2,6 +2,7 @@
 {
     using System;
     using System.Collections.Generic;
+    using System.IO;
 
     public static class SimpleOwinEnvironmentExtensions
     {
@@ -16,6 +17,11 @@
             if (callback != null)
                 callback(headers);
             return env;
+        }
+
+        public static Stream GetOwinResponseBody(this IDictionary<string, object> env)
+        {
+            return env.GetOwinEnvironmentValue<Stream>("owin.ResponseBody");
         }
     }
 }
