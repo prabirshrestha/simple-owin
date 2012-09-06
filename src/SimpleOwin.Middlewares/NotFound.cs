@@ -8,20 +8,27 @@
 
     public class NotFound
     {
-        public static Func<AppFunc, AppFunc> Middleware()
+        private const string DefaultNotFoundMessage = "<h1>:( Not Found</h1>";
+
+        public static Func<AppFunc, AppFunc> Middleware(string text = DefaultNotFoundMessage, string contentType = "text/html")
         {
-            const string responseBody = "<h1>:( Not Found</h1>";
-            var data = Encoding.UTF8.GetBytes(responseBody);
+            var data = Encoding.UTF8.GetBytes(text);
 
             return
                 next =>
                 async env =>
                 {
-                    env.SetOwinResponseStatusCode(404);
+                    env
+                        .SetOwinResponseStatusCode(404)
+                        .GetOwinResponseHeaders(headers =>
+                                                    {
+                                                        if (!string.IsNullOrWhiteSpace(contentType))
+                                                            headers.SetOwinHeader("Content-Type", contentType);
+                                                    });
 
-                    var resBody = env.GetOwinResponseBody();
-
-                    await resBody.WriteAsync(data, 0, data.Length);
+                    await env
+                        .GetOwinResponseBody()
+                        .WriteAsync(data, 0, data.Length);
 
                     await next(env);
                 };
