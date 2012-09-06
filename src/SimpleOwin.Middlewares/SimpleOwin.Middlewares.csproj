@@ -43,6 +43,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="_boilerplate.cs" />
+    <Compile Include="NotFound.cs" />
     <Compile Include="Extensions\SimpleOwinEnvironmentExtensions.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

@@ -9,11 +9,13 @@
     {
          public static Func<AppFunc, AppFunc> Middleware()
          {
-             return next =>
-                    env =>
-                        {
-                            return next(env);
-                        };
+             return
+                 next =>
+                 env =>
+                 {
+
+                     return next(env);
+                 };
          }
     }
 }
