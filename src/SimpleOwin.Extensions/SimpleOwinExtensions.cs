@@ -4,7 +4,7 @@
     using System.Collections.Generic;
     using System.IO;
 
-    public static class SimpleOwinEnvironmentExtensions
+    public static class SimpleOwinExtensions
     {
         public static IDictionary<string, string[]> GetOwinResponseHeaders(this IDictionary<string, object> env)
         {
@@ -40,6 +40,12 @@
         {
             headers[key] = new[] { value };
             return headers;
+        }
+
+        public static T GetOwinEnvironmentValue<T>(this IDictionary<string, object> env, string key, T defaultValue = default(T))
+        {
+            object value;
+            return env.TryGetValue(key, out value) && value is T ? (T)value : defaultValue;
         }
     }
 }
