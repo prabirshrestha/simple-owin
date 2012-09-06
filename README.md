@@ -1,4 +1,6 @@
-# OWIN samples
+# SimpleOwin
+
+## Samples
 
 Includes the following samples
 
@@ -8,5 +10,10 @@ Includes the following samples
 Web socket samples (requires full IIS8 on Windows8 with `#define ASPNET_WEBSOCKETS`)
 
 * Hello world OWIN WebSocket extension sample
+
+## Middlewares
+
+### AspNetWebSocketMiddleware
+Adds support for OWIN WebSockets extensions if running on Windows 8+ with IIS8+.
 
 For more infomation about OWIN visit http://owin.org/

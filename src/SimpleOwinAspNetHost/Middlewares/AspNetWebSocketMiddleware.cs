@@ -1,4 +1,6 @@
-﻿namespace SimpleOwinAspNetHost.Middlewares
+﻿// https://github.com/prabirshrestha/simple-owin
+
+namespace SimpleOwinAspNetHost.Middlewares
 {
     using System;
     using System.Collections.Generic;
