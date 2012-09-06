@@ -12,21 +12,19 @@
     {
         public static Func<AppFunc, AppFunc> Middleware(Func<string, string> urlDecoder = null)
         {
-            if (urlDecoder == null)
-                urlDecoder = HttpUtility.UrlDecode;
-
             return
                 next =>
                 env =>
                 {
-                    env["simpleOwin.query"] = new Lazy<IDictionary<string, string[]>>(() => GetQuerystring(env, urlDecoder));
+                    env["simpleOwin.query"] = new Lazy<IDictionary<string, string[]>>(() => ParseQuerystring(env.GetOwinRequestQueryString(), urlDecoder));
                     return next(env);
                 };
         }
 
-        private static IDictionary<string, string[]> GetQuerystring(IDictionary<string, object> env, Func<string, string> urlDecoder)
+        public static IDictionary<string, string[]> ParseQuerystring(string querystring, Func<string, string> urlDecoder = null)
         {
-            var querystring = env.GetOwinRequestQueryString();
+            if (urlDecoder == null)
+                urlDecoder = HttpUtility.UrlDecode;
 
             var queryDictionary = new Dictionary<string, List<string>>();
 
