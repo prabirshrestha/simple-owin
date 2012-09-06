@@ -1,12 +1,72 @@
 ﻿namespace SimpleOwinAspNetHost.Middlewares
 {
     using System;
+    using System.Collections.Generic;
     using System.Linq;
     using System.Linq.Expressions;
     using System.Net.WebSockets;
     using System.Reflection;
+    using System.Threading;
+    using System.Threading.Tasks;
 
     using AppFunc = System.Func<System.Collections.Generic.IDictionary<string, object>, System.Threading.Tasks.Task>;
+
+    using WebSocketSendAsync = System.Func<
+            System.ArraySegment<byte>, // data
+            int, // message type
+            bool, // end of message
+            System.Threading.CancellationToken, // cancel
+            System.Threading.Tasks.Task>;
+
+    using WebSocketReceiveResultTuple = System.Tuple<
+                        int, // messageType
+                        bool, // endOfMessage
+                        int?, // count
+                        int?, // closeStatus
+                        string>; // closeStatusDescription
+
+    using WebSocketReceiveAsync = System.Func<
+                System.ArraySegment<byte>, // data
+                System.Threading.CancellationToken, // cancel
+                System.Threading.Tasks.Task<
+                    System.Tuple<
+                        int, // messageType
+                        bool, // endOfMessage
+                        int?, // count
+                        int?, // closeStatus
+                        string>>>; // closeStatusDescription
+
+    using WebSocketCloseAsync = System.Func<
+                int, // closeStatus
+                string, // closeDescription
+                System.Threading.CancellationToken, // cancel
+                System.Threading.Tasks.Task>;
+
+#pragma warning disable 811
+    using WebSocketAction = System.Func<
+            System.Func< // WebSocketSendAsync 
+                System.ArraySegment<byte>, // data
+                int, // message type
+                bool, // end of message
+                System.Threading.CancellationToken, // cancel
+                System.Threading.Tasks.Task>,
+            System.Func< // WebSocketReceiveAsync
+                System.ArraySegment<byte>, // data
+                System.Threading.CancellationToken, // cancel
+                System.Threading.Tasks.Task<
+                    System.Tuple<
+                        int, // messageType
+                        bool, // endOfMessage
+                        int?, // count
+                        int?, // closeStatus
+                        string>>>, // closeStatusDescription
+             System.Func< // WebSocketCloseAsync
+                int, // closeStatus
+                string, // closeDescription
+                System.Threading.CancellationToken, // cancel
+                System.Threading.Tasks.Task>,
+            System.Threading.Tasks.Task>; // complete
+#pragma warning restore 811
 
     public class AspNetWebSocketMiddleware
     {
@@ -95,8 +155,7 @@
         private static Expression[] CreateParameterExpressions(MethodInfo method, Expression argumentsParameter)
         {
             return method.GetParameters().Select((parameter, index) =>
-              Expression.Convert(
-                Expression.ArrayIndex(argumentsParameter, Expression.Constant(index)), parameter.ParameterType)).ToArray();
+              Expression.Convert(Expression.ArrayIndex(argumentsParameter, Expression.Constant(index)), parameter.ParameterType)).ToArray();
         }
 
         private static Func<object, T> GetGetMethodByExpression<T>(PropertyInfo propertyInfo)
@@ -108,13 +167,129 @@
             return source => (T)compiled(source);
         }
 
-        public static Func<AppFunc, AppFunc> Middleware(bool? force = null)
+        public static Func<AppFunc, AppFunc> Middleware(bool autodetect = true, string httpContextBaseKey = "aspnet.HttpContextBase")
         {
+            var ws = new AspNetWebSocketMiddleware(autodetect);
+
+            if (!ws.SupportsWebSockets)
+            {
+                return app => app;
+            }
+
             return app =>
-                env =>
+                async env =>
                 {
-                    return app(env);
+                    var httpWebContext = Get<object>(env, httpContextBaseKey, null);
+                    if (httpWebContext == null)
+                    {
+                        await app(env);
+                        return;
+                    }
+
+                    if (ws._isWebSocketRequest(httpWebContext))
+                    {
+                        env["websocket.Support"] = "WebSocketFunc";
+                    }
+
+                    await app(env);
+
+                    int responseStatusCode = Get<int>(env, "owin.ResponseStatusCode", 200);
+
+                    object tempWsBodyDelegate;
+                    if (responseStatusCode == 101 &&
+                        env.TryGetValue("websocket.Func", out tempWsBodyDelegate) &&
+                        tempWsBodyDelegate != null)
+                    {
+                        var wsBodyDelegate = (WebSocketAction)tempWsBodyDelegate;
+
+                        ws._acceptWebSocketRequest(httpWebContext,
+                              new object[]
+                                   {
+                                       (Func<object, Task>)(async websocketContext =>
+                                                                {
+                                                                    env["aspnet.AspNetWebSocketContext"] = websocketContext;
+                                                                    var webSocket = ws._getWebSocketFromWebSocketContext(websocketContext);
+
+                                                                    await wsBodyDelegate(WebSocketSendAsync(webSocket), WebSocketReceiveAsync(webSocket), WebSocketCloseAsync(webSocket));
+
+                                                                    switch (webSocket.State)
+                                                                    {
+                                                                        case WebSocketState.Closed:  // closed gracefully, no action needed
+                                                                        case WebSocketState.Aborted: // closed abortively, no action needed
+                                                                            break;
+                                                                        case WebSocketState.CloseReceived:
+                                                                            await webSocket.CloseAsync(WebSocketCloseStatus.NormalClosure, string.Empty, CancellationToken.None);
+                                                                            break;
+                                                                        case WebSocketState.Open:
+                                                                        case WebSocketState.CloseSent: // No close received, abort so we don't have to drain the pipe.
+                                                                            webSocket.Abort();
+                                                                            break;
+                                                                        default:
+                                                                            throw new ArgumentOutOfRangeException("state", webSocket.State, string.Empty);
+                                                                    }
+
+                                                                    // todo close response
+                                                                    //response.Close();
+                                                                })
+                                   });
+                    }
                 };
+        }
+
+        private static T Get<T>(IDictionary<string, object> env, string key, T defaultValue)
+        {
+            object value;
+            return env.TryGetValue(key, out value) && value is T ? (T)value : defaultValue;
+        }
+
+        private static WebSocketSendAsync WebSocketSendAsync(WebSocket webSocket)
+        {
+            return (buffer, messageType, endOfMessage, cancel) =>
+                webSocket.SendAsync(buffer, OpCodeToEnum(messageType), endOfMessage, cancel);
+        }
+
+        private static WebSocketReceiveAsync WebSocketReceiveAsync(WebSocket webSocket)
+        {
+            return async (buffer, cancel) =>
+            {
+                var nativeResult = await webSocket.ReceiveAsync(buffer, cancel);
+                return new WebSocketReceiveResultTuple(
+                    EnumToOpCode(nativeResult.MessageType),
+                    nativeResult.EndOfMessage,
+                    (nativeResult.MessageType == WebSocketMessageType.Close ? null : (int?)nativeResult.Count),
+                    (int?)nativeResult.CloseStatus,
+                    nativeResult.CloseStatusDescription);
+            };
+        }
+
+        private static WebSocketCloseAsync WebSocketCloseAsync(WebSocket webSocket)
+        {
+            return (status, description, cancel) =>
+                webSocket.CloseOutputAsync((WebSocketCloseStatus)status, description, cancel);
+        }
+
+        private static WebSocketMessageType OpCodeToEnum(int messageType)
+        {
+            switch (messageType)
+            {
+                case 0x1: return WebSocketMessageType.Text;
+                case 0x2: return WebSocketMessageType.Binary;
+                case 0x8: return WebSocketMessageType.Close;
+                default:
+                    throw new ArgumentOutOfRangeException("messageType", messageType, string.Empty);
+            }
+        }
+
+        private static int EnumToOpCode(WebSocketMessageType webSocketMessageType)
+        {
+            switch (webSocketMessageType)
+            {
+                case WebSocketMessageType.Text: return 0x1;
+                case WebSocketMessageType.Binary: return 0x2;
+                case WebSocketMessageType.Close: return 0x8;
+                default:
+                    throw new ArgumentOutOfRangeException("webSocketMessageType", webSocketMessageType, string.Empty);
+            }
         }
     }
 }
