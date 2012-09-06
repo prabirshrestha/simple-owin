@@ -8,7 +8,7 @@ namespace SimpleOwin.Middlewares.Router
 
     using AppFunc = System.Func<System.Collections.Generic.IDictionary<string, object>, System.Threading.Tasks.Task>;
 
-    public class Router : IRouter
+    public class RegexRouter : IRouter
     {
         private readonly bool _ignoreCase;
         private readonly ICollection<Func<AppFunc, AppFunc>> _routes;
@@ -16,7 +16,7 @@ namespace SimpleOwin.Middlewares.Router
 
         public bool IgnoreCase { get { return _ignoreCase; } }
 
-        public Router(bool ignoreCase = true)
+        public RegexRouter(bool ignoreCase = true)
         {
             _ignoreCase = ignoreCase;
             _routes = new List<Func<AppFunc, AppFunc>>();
