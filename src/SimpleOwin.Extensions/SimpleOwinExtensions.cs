@@ -29,6 +29,19 @@
             return env.GetOwinEnvironmentValue<string>("owin.RequestScheme");
         }
 
+        public static IDictionary<string, string[]> GetOwinRequesteHeaders(this IDictionary<string, object> env)
+        {
+            return env.GetOwinEnvironmentValue<IDictionary<string, string[]>>("owin.RequestHeaders");
+        }
+
+        public static IDictionary<string, object> GetOwinRequesteHeaders(this IDictionary<string, object> env, Action<IDictionary<string, string[]>> callback)
+        {
+            var headers = env.GetOwinResponseHeaders();
+            if (callback != null)
+                callback(headers);
+            return env;
+        }
+
         public static IDictionary<string, string[]> GetOwinResponseHeaders(this IDictionary<string, object> env)
         {
             return env.GetOwinEnvironmentValue<IDictionary<string, string[]>>("owin.ResponseHeaders");
