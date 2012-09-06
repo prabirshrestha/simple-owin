@@ -3,9 +3,22 @@
     using System;
     using System.Collections.Generic;
     using System.IO;
+    using System.Linq;
+    using System.Threading.Tasks;
+
+    using AppFunc = System.Func<System.Collections.Generic.IDictionary<string, object>, System.Threading.Tasks.Task>;
 
     public static class SimpleOwinExtensions
     {
+        public static readonly Task CachedCompletedResultTupleTask;
+
+        static SimpleOwinExtensions()
+        {
+            var tcs = new TaskCompletionSource<int>();
+            tcs.TrySetResult(0);
+            CachedCompletedResultTupleTask = tcs.Task;
+        }
+
         public static IDictionary<string, string[]> GetOwinResponseHeaders(this IDictionary<string, object> env)
         {
             return env.GetOwinEnvironmentValue<IDictionary<string, string[]>>("owin.ResponseHeaders");
@@ -46,6 +59,31 @@
         {
             object value;
             return env.TryGetValue(key, out value) && value is T ? (T)value : defaultValue;
+        }
+
+        public static AppFunc ToOwinAppFunc(this IEnumerable<Func<AppFunc, AppFunc>> app)
+        {
+            var apps = app.ToList();
+
+            return
+                env =>
+                {
+                    AppFunc next = null;
+                    int index = 0;
+
+                    next = env2 =>
+                    {
+                        if (index == apps.Count)
+                            return CachedCompletedResultTupleTask; // we are done
+
+                        Func<AppFunc, AppFunc> other = apps[index++];
+                        // ReSharper disable AccessToModifiedClosure
+                        return other(env3 => next(env3))(env2);
+                        // ReSharper restore AccessToModifiedClosure
+                    };
+
+                    return next(env);
+                };
         }
     }
 }
