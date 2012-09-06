@@ -29,5 +29,17 @@
             env["owin.ResponseStatusCode"] = statusCode;
             return env;
         }
+
+        public static IDictionary<string, string[]> SetOwinHeader(this IDictionary<string, string[]> headers, string key, string[] value)
+        {
+            headers[key] = value;
+            return headers;
+        }
+
+        public static IDictionary<string, string[]> SetOwinHeader(this IDictionary<string, string[]> headers, string key, string value)
+        {
+            headers[key] = new[] { value };
+            return headers;
+        }
     }
 }
