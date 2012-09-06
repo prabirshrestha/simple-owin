@@ -23,5 +23,11 @@
         {
             return env.GetOwinEnvironmentValue<Stream>("owin.ResponseBody");
         }
+
+        public static IDictionary<string, object> SetOwinResponseStatusCode(this IDictionary<string, object> env, int statusCode)
+        {
+            env["owin.ResponseStatusCode"] = statusCode;
+            return env;
+        }
     }
 }
