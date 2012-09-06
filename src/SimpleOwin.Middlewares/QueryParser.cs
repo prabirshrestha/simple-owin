@@ -4,6 +4,7 @@
     using System.Collections.Generic;
     using System.Linq;
     using SimpleOwin.Extensions;
+    using SimpleOwin.Middlewares.Helpers;
 
     using AppFunc = System.Func<System.Collections.Generic.IDictionary<string, object>, System.Threading.Tasks.Task>;
 
@@ -12,10 +13,7 @@
         public static Func<AppFunc, AppFunc> Middleware(Func<string, string> urlDecoder = null)
         {
             if (urlDecoder == null)
-            {
-                // todo: set default url decoder
-                urlDecoder = str => str;
-            }
+                urlDecoder = HttpUtility.UrlDecode;
 
             return
                 next =>

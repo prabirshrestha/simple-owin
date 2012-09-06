@@ -43,6 +43,8 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="_boilerplate.cs" />
+    <Compile Include="Helpers\HttpEncoder.cs" />
+    <Compile Include="Helpers\HttpUtility.cs" />
     <Compile Include="QueryParser.cs" />
     <Compile Include="MethodOverride.cs" />
     <Compile Include="NotFound.cs" />
@@ -54,6 +56,7 @@
       <Name>SimpleOwin.Extensions</Name>
     </ProjectReference>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
