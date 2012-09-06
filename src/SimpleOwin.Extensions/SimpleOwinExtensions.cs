@@ -103,6 +103,12 @@
             return headers;
         }
 
+        public static string[] GetOwinHeader(IDictionary<string, string[]> headers, string key, string[] defaultValue = null)
+        {
+            string[] values;
+            return headers.TryGetValue(key, out values) ? values : defaultValue;
+        }
+
         public static T GetOwinEnvironmentValue<T>(this IDictionary<string, object> env, string key, T defaultValue = default(T))
         {
             object value;
