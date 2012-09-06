@@ -14,6 +14,7 @@
             var app = new List<Func<AppFunc, AppFunc>>();
 
             app.Add(QueryParser.Middleware());
+            app.Add(JsonBodyParser.Middleware());
             app.Add(MethodOverride.Middleware());
             app.Add(NotFound.Middleware());
 

@@ -45,6 +45,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="JsonBodyParser.cs" />
     <Compile Include="SimpleJson.cs" />
     <None Include="packages.config" />
     <None Include="_boilerplate.cs" />
