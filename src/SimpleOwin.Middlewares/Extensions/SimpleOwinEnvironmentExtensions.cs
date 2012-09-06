@@ -10,9 +10,15 @@
             return env.GetSimpleOwinValue<IDictionary<string, string[]>>("owin.ResponseHeaders");
         }
 
-        public static Stream GetOwinResponseBody(this IDictionary<string, object> env )
+        public static Stream GetOwinResponseBody(this IDictionary<string, object> env)
         {
             return env.GetSimpleOwinValue<Stream>("owin.ResponseBody");
+        }
+
+        public static IDictionary<string, object> SetOwinResponseStatusCode(this IDictionary<string, object> env, int statusCode)
+        {
+            env["owin.ResponseStatusCode"] = statusCode;
+            return env;
         }
 
         public static T GetSimpleOwinValue<T>(this IDictionary<string, object> env, string key, T defaultValue = default(T))
