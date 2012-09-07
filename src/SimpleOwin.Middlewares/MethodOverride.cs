@@ -20,7 +20,7 @@
 
                     if (string.IsNullOrWhiteSpace(method))
                     {
-                        // try checking body, requires JsonBodyParser middleware
+                        // try checking body, requires JsonBodyParser/UrlEncoded middleware
                         if (checkBody)
                         {
                             var body = env.GetOwinEnvironmentValue<Lazy<object>>("simpleOwin.body");
@@ -28,11 +28,25 @@
                             {
                                 try
                                 {
-                                    var dict = body.Value as IDictionary<string, object>;
-                                    if (dict != null)
+                                    var dictStringObject = body.Value as IDictionary<string, object>;
+                                    if (dictStringObject == null)
+                                    {
+                                        var dictStringStringArray = body.Value as IDictionary<string, string[]>;
+                                        string[] tempValue;
+                                        if (dictStringStringArray != null && dictStringStringArray.TryGetValue(key, out tempValue))
+                                        {
+                                            if (tempValue != null && tempValue.Length == 1)
+                                            {
+                                                var stringTempValue = tempValue[0];
+                                                if (!string.IsNullOrWhiteSpace(stringTempValue))
+                                                    method = stringTempValue;
+                                            }
+                                        }
+                                    }
+                                    else
                                     {
                                         object tempValue;
-                                        if (dict.TryGetValue(key, out tempValue))
+                                        if (dictStringObject.TryGetValue(key, out tempValue))
                                         {
                                             var stringTempValue = tempValue as string;
                                             if (!string.IsNullOrWhiteSpace(stringTempValue))
