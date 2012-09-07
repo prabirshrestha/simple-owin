@@ -18,7 +18,7 @@ namespace SimpleOwin.Middlewares.Router
 
         public bool IgnoreCase { get { return _ignoreCase; } }
 
-        public RegexRouter(bool ignoreCase = true)
+        public RegexRouter(ICollection<Func<AppFunc, AppFunc>> app = null, bool ignoreCase = true)
         {
             _ignoreCase = ignoreCase;
             _defaultRegexOptions = RegexOptions.CultureInvariant | RegexOptions.Compiled;
@@ -27,6 +27,9 @@ namespace SimpleOwin.Middlewares.Router
 
             if (ignoreCase)
                 _defaultRegexOptions |= RegexOptions.IgnoreCase;
+
+            if (app != null)
+                app.Add(Middleware());
         }
 
         private Regex CreateRegex(string route)

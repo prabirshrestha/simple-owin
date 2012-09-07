@@ -19,8 +19,8 @@
             app.Add(JsonBodyParser.Middleware());
             app.Add(MethodOverride.Middleware());
 
-            IRouter router = new RegexRouter();
-            app.Add(router.Middleware());
+            IRouter router = new RegexRouter(app); // this will auto call app.Add(router.Middleware());
+            // you can manually add it later on if you pass nothing in Router constructor are pass it as null
 
             router.Get("hello", next =>
                             async env =>

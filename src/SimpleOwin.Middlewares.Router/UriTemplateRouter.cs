@@ -12,9 +12,11 @@
         private readonly UriTemplateTable _table;
         private readonly Uri _prefix = new Uri("http://localhost/");
 
-        public UriTemplateRouter()
+        public UriTemplateRouter(ICollection<Func<AppFunc, AppFunc>> app = null)
         {
             _table = new UriTemplateTable(_prefix);
+            if (app != null)
+                app.Add(Middleware());
         }
 
         private void Method(string methodName, string route, Func<AppFunc, AppFunc> callback)
