@@ -2,6 +2,8 @@
 {
     using System;
     using System.Collections.Generic;
+    using System.Diagnostics;
+    using System.Runtime.Serialization;
     using SimpleOwin.Extensions;
 
     using AppFunc = System.Func<System.Collections.Generic.IDictionary<string, object>, System.Threading.Tasks.Task>;
@@ -26,37 +28,43 @@
                             var body = env.GetOwinEnvironmentValue<Lazy<object>>("simpleOwin.body");
                             if (body != null)
                             {
+                                IDictionary<string, object> dictStringObject = null;
+
                                 try
                                 {
-                                    var dictStringObject = body.Value as IDictionary<string, object>;
-                                    if (dictStringObject == null)
+                                    dictStringObject = body.Value as IDictionary<string, object>;
+                                }
+                                catch (SerializationException ex)
+                                {
+                                    // json serialization failed, do nothing
+                                    // handle fatal error
+                                    Trace.WriteLine(ex.Message);
+                                }
+
+                                if (dictStringObject == null)
+                                {
+                                    var dictStringStringArray = body.Value as IDictionary<string, string[]>;
+                                    string[] tempValue;
+                                    if (dictStringStringArray != null &&
+                                        dictStringStringArray.TryGetValue(key, out tempValue))
                                     {
-                                        var dictStringStringArray = body.Value as IDictionary<string, string[]>;
-                                        string[] tempValue;
-                                        if (dictStringStringArray != null && dictStringStringArray.TryGetValue(key, out tempValue))
+                                        if (tempValue != null && tempValue.Length == 1)
                                         {
-                                            if (tempValue != null && tempValue.Length == 1)
-                                            {
-                                                var stringTempValue = tempValue[0];
-                                                if (!string.IsNullOrWhiteSpace(stringTempValue))
-                                                    method = stringTempValue;
-                                            }
-                                        }
-                                    }
-                                    else
-                                    {
-                                        object tempValue;
-                                        if (dictStringObject.TryGetValue(key, out tempValue))
-                                        {
-                                            var stringTempValue = tempValue as string;
+                                            var stringTempValue = tempValue[0];
                                             if (!string.IsNullOrWhiteSpace(stringTempValue))
                                                 method = stringTempValue;
                                         }
                                     }
                                 }
-                                catch (Exception ex)
+                                else
                                 {
-                                    // do nothing, parsing json failed
+                                    object tempValue;
+                                    if (dictStringObject.TryGetValue(key, out tempValue))
+                                    {
+                                        var stringTempValue = tempValue as string;
+                                        if (!string.IsNullOrWhiteSpace(stringTempValue))
+                                            method = stringTempValue;
+                                    }
                                 }
                             }
                         }
