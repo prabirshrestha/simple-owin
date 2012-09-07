@@ -16,6 +16,7 @@
             var app = new List<Func<AppFunc, AppFunc>>();
 
             app.Add(H5bp.IeEdgeChromeFrameHeader());
+            app.Add(H5bp.RemovePoweredBy());
             app.Add(QueryParser.Middleware());
             app.Add(JsonBodyParser.Middleware());
             app.Add(MethodOverride.Middleware());
