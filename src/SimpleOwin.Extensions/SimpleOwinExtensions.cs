@@ -179,6 +179,12 @@
             return env.TryGetValue(name, out value) && value is T ? (T)value : defaultValue;
         }
 
+        public static ICollection<Func<AppFunc, AppFunc>> Use(this ICollection<Func<AppFunc, AppFunc>> app, Func<AppFunc, AppFunc> middleware)
+        {
+            app.Add(middleware);
+            return app;
+        }
+
         public static AppFunc ToOwinAppFunc(this IEnumerable<Func<AppFunc, AppFunc>> app)
         {
             var enumerable = app as Func<AppFunc, AppFunc>[] ?? app.ToArray();
