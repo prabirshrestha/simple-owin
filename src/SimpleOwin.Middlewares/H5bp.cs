@@ -41,5 +41,22 @@
                     return next(env);
                 };
         }
+
+        /// <summary>
+        /// Enable CORS cross domain rules, more info at http://enble-cors.org/
+        /// </summary>
+        public static Func<AppFunc, AppFunc> CrossDomainRules()
+        {
+            return
+                next =>
+                env =>
+                {
+                    env.GetOwinResponseHeaders()
+                        .SetOwinHeader("Access-Control-Allow-Origin", "*")
+                        .SetOwinHeader("Access-Control-Allow-Headers", "X-Requested-With");
+
+                    return next(env);
+                };
+        }
     }
 }

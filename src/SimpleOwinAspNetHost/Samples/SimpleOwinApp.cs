@@ -17,6 +17,7 @@
 
             app.Add(H5bp.IeEdgeChromeFrameHeader());
             app.Add(H5bp.RemovePoweredBy());
+            app.Add(H5bp.CrossDomainRules());
             app.Add(QueryParser.Middleware());
             app.Add(JsonBodyParser.Middleware());
             app.Add(MethodOverride.Middleware());
