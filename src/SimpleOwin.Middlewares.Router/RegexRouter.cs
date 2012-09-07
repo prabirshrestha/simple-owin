@@ -1,17 +1,19 @@
 ﻿
 namespace SimpleOwin.Middlewares.Router
 {
-    using SimpleOwin.Extensions;
     using System;
     using System.Collections.Generic;
     using System.Text.RegularExpressions;
+    using SimpleOwin.Extensions;
 
     using AppFunc = System.Func<System.Collections.Generic.IDictionary<string, object>, System.Threading.Tasks.Task>;
 
     public class RegexRouter : IRouter
     {
         private readonly bool _ignoreCase;
-        private readonly ICollection<Func<AppFunc, AppFunc>> _routes;
+        // method, route, regex, callback
+        private readonly ICollection<Tuple<string, string, Regex, Func<AppFunc, AppFunc>>> _routes;
+
         private readonly RegexOptions _defaultRegexOptions;
 
         public bool IgnoreCase { get { return _ignoreCase; } }
@@ -19,8 +21,9 @@ namespace SimpleOwin.Middlewares.Router
         public RegexRouter(bool ignoreCase = true)
         {
             _ignoreCase = ignoreCase;
-            _routes = new List<Func<AppFunc, AppFunc>>();
             _defaultRegexOptions = RegexOptions.CultureInvariant | RegexOptions.Compiled;
+
+            _routes = new List<Tuple<string, string, Regex, Func<AppFunc, AppFunc>>>();
 
             if (ignoreCase)
                 _defaultRegexOptions |= RegexOptions.IgnoreCase;
@@ -42,7 +45,7 @@ namespace SimpleOwin.Middlewares.Router
             if (callback == null)
                 throw new ArgumentNullException("callback");
 
-            _routes.Add(callback);
+            _routes.Add(new Tuple<string, string, Regex, Func<AppFunc, AppFunc>>(null, null, null, callback));
         }
 
         public void All(string route, Func<AppFunc, AppFunc> callback)
@@ -52,12 +55,7 @@ namespace SimpleOwin.Middlewares.Router
 
             var regex = CreateRegex(route);
 
-            _routes.SimpleOwinAddIf(env =>
-                                        {
-                                            var requestPath = env.GetOwinRequestPath();
-                                            return regex.IsMatch(requestPath);
-                                        }, callback);
-            _routes.Add(callback);
+            _routes.Add(new Tuple<string, string, Regex, Func<AppFunc, AppFunc>>(null, route, regex, callback));
         }
 
         private void Method(string methodName, string route, Func<AppFunc, AppFunc> callback)
@@ -67,13 +65,7 @@ namespace SimpleOwin.Middlewares.Router
 
             var regex = CreateRegex(route);
 
-            _routes.SimpleOwinAddIf(env =>
-                                        {
-                                            var method = env.GetOwinRequestMethod();
-                                            var requestPath = env.GetOwinRequestPath();
-                                            return method.Equals(methodName, StringComparison.OrdinalIgnoreCase) && regex.IsMatch(requestPath);
-
-                                        }, callback);
+            _routes.Add(new Tuple<string, string, Regex, Func<AppFunc, AppFunc>>(methodName, route, regex, callback));
         }
 
         public void Get(string route, Func<AppFunc, AppFunc> callback)
@@ -113,7 +105,37 @@ namespace SimpleOwin.Middlewares.Router
 
         public Func<AppFunc, AppFunc> Middleware()
         {
-            return app => env => _routes.ToOwinAppFunc()(env);
+            return next =>
+                   env =>
+                   {
+                       var method = env.GetOwinRequestMethod();
+                       var path = env.GetOwinRequestPath();
+
+                       foreach (var routeToExectue in _routes)
+                       {
+                           var routeMethod = routeToExectue.Item1;
+                           //var route = routeToExectue.Item2;
+                           var regex = routeToExectue.Item3;
+                           var callback = routeToExectue.Item4;
+
+                           if (routeMethod != null)
+                           {
+                               if (!routeMethod.Equals(method, StringComparison.OrdinalIgnoreCase))
+                                   continue;
+                           }
+
+                           if (regex != null)
+                           {
+                               var match = regex.Match(path);
+                               if (!match.Success)
+                                   continue;
+                           }
+
+                           return callback(next)(env);
+                       }
+
+                       return next(env);
+                   };
         }
     }
 }

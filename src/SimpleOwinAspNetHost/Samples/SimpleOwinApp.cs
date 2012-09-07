@@ -19,7 +19,7 @@
             app.Add(JsonBodyParser.Middleware());
             app.Add(MethodOverride.Middleware());
 
-            IRouter router = new UriTemplateRouter();
+            IRouter router = new RegexRouter();
             app.Add(router.Middleware());
 
             router.Get("hello", next =>
