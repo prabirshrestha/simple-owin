@@ -114,6 +114,13 @@
             return headers;
         }
 
+        public static IDictionary<string, string[]> RemoveOwinHeader(this IDictionary<string, string[]> headers, string name)
+        {
+            if (headers.ContainsKey(name))
+                headers.Remove(name);
+            return headers;
+        }
+
         public static string[] GetOwinHeaderValues(this IDictionary<string, string[]> headers, string name, string[] defaultValue = null)
         {
             string[] values;
