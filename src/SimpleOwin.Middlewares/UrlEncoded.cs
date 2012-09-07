@@ -1,15 +1,18 @@
 ﻿namespace SimpleOwin.Middlewares
 {
-    using SimpleOwin.Extensions;
     using System;
+    using System.Collections.Generic;
     using System.IO;
     using System.Linq;
+    using SimpleOwin.Extensions;
 
     using AppFunc = System.Func<System.Collections.Generic.IDictionary<string, object>, System.Threading.Tasks.Task>;
 
-    public class JsonBodyParser
+    public class UrlEncoded
     {
-        public static Func<AppFunc, AppFunc> Middleware(Func<string, object> jsonDeserializer = null)
+        private const string UrlFormEncodedContentType = "application/x-www-form-urlencoded";
+
+        public static Func<AppFunc, AppFunc> Middleware(Func<string, string> urlDecoder = null)
         {
             return
                 next =>
@@ -22,13 +25,12 @@
                     if (contentType == null)
                         return next(env);
 
-                    if (contentType.Any(t => t == "application/json"))
+                    if (contentType.Any(t => t == UrlFormEncodedContentType))
                     {
-                        env["simpleOwin.body"] = new Lazy<object>(
+                        env["simpleOwin.body"] = new Lazy<IDictionary<string, string[]>>(
                             () =>
                             {
-                                var json = ParseJson(env.GetOwinRequestBody(), jsonDeserializer);
-                                return json;
+                                return ParseUrlFormEncodedBody(env.GetOwinRequestBody(), urlDecoder);
                             });
                     }
 
@@ -36,15 +38,12 @@
                 };
         }
 
-        private static object ParseJson(Stream stream, Func<string, object> jsonDeserializer)
+        private static IDictionary<string, string[]> ParseUrlFormEncodedBody(Stream stream, Func<string, string> urlDecoder = null)
         {
-            if (jsonDeserializer == null)
-                jsonDeserializer = SimpleJson.DeserializeObject;
-
             using (var reader = new StreamReader(stream))
             {
-                var jsonString = reader.ReadToEnd();
-                return jsonDeserializer(jsonString);
+                var formBody = reader.ReadToEnd();
+                return QueryParser.ParseQuerystring(formBody, urlDecoder);
             }
         }
     }

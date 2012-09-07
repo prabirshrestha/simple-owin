@@ -28,6 +28,7 @@
             // and you can mix both Use and Add
             app
                 .Use(JsonBodyParser.Middleware())
+                .Use(UrlEncoded.Middleware())
                 .Use(MethodOverride.Middleware());
 
             IRouter router = new RegexRouter(app); // this will auto call app.Add(router.Middleware());
