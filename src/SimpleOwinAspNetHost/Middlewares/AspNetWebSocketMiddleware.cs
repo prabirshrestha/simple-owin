@@ -13,14 +13,19 @@ namespace SimpleOwinAspNetHost.Middlewares
 
     using AppFunc = System.Func<System.Collections.Generic.IDictionary<string, object>, System.Threading.Tasks.Task>;
 
-    using WebSocketSendAsync = System.Func<
-            System.ArraySegment<byte>, // data
-            int, // message type
-            bool, // end of message
-            System.Threading.CancellationToken, // cancel
-            System.Threading.Tasks.Task>;
+    using WebSocketFunc =
+       System.Func<
+           System.Collections.Generic.IDictionary<string, object>, // WebSocket Environment
+           System.Threading.Tasks.Task>; // Complete
 
-    using WebSocketReceiveResultTuple = System.Tuple<
+    using WebSocketSendAsync = System.Func<
+                System.ArraySegment<byte>, // data
+                int, // message type
+                bool, // end of message
+                System.Threading.CancellationToken, // cancel
+                System.Threading.Tasks.Task>;
+
+    using WebSocketReceiveTuple = System.Tuple<
                         int, // messageType
                         bool, // endOfMessage
                         int?, // count
@@ -31,7 +36,7 @@ namespace SimpleOwinAspNetHost.Middlewares
                 System.ArraySegment<byte>, // data
                 System.Threading.CancellationToken, // cancel
                 System.Threading.Tasks.Task<
-                    System.Tuple<
+                    System.Tuple< // WebSocketReceiveTuple
                         int, // messageType
                         bool, // endOfMessage
                         int?, // count
@@ -43,32 +48,6 @@ namespace SimpleOwinAspNetHost.Middlewares
                 string, // closeDescription
                 System.Threading.CancellationToken, // cancel
                 System.Threading.Tasks.Task>;
-
-#pragma warning disable 811
-    using WebSocketAction = System.Func<
-            System.Func< // WebSocketSendAsync 
-                System.ArraySegment<byte>, // data
-                int, // message type
-                bool, // end of message
-                System.Threading.CancellationToken, // cancel
-                System.Threading.Tasks.Task>,
-            System.Func< // WebSocketReceiveAsync
-                System.ArraySegment<byte>, // data
-                System.Threading.CancellationToken, // cancel
-                System.Threading.Tasks.Task<
-                    System.Tuple<
-                        int, // messageType
-                        bool, // endOfMessage
-                        int?, // count
-                        int?, // closeStatus
-                        string>>>, // closeStatusDescription
-             System.Func< // WebSocketCloseAsync
-                int, // closeStatus
-                string, // closeDescription
-                System.Threading.CancellationToken, // cancel
-                System.Threading.Tasks.Task>,
-            System.Threading.Tasks.Task>; // complete
-#pragma warning restore 811
 
     public class AspNetWebSocketMiddleware
     {
@@ -202,17 +181,24 @@ namespace SimpleOwinAspNetHost.Middlewares
                         env.TryGetValue("websocket.Func", out tempWsBodyDelegate) &&
                         tempWsBodyDelegate != null)
                     {
-                        var wsBodyDelegate = (WebSocketAction)tempWsBodyDelegate;
+                        var wsBodyDelegate = (WebSocketFunc)tempWsBodyDelegate;
 
                         ws._acceptWebSocketRequest(httpWebContext,
                               new object[]
                                    {
                                        (Func<object, Task>)(async websocketContext =>
                                                                 {
-                                                                    env["aspnet.AspNetWebSocketContext"] = websocketContext;
                                                                     var webSocket = ws._getWebSocketFromWebSocketContext(websocketContext);
 
-                                                                    await wsBodyDelegate(WebSocketSendAsync(webSocket), WebSocketReceiveAsync(webSocket), WebSocketCloseAsync(webSocket));
+                                                                    var wsEnv = new Dictionary<string, object>(StringComparer.OrdinalIgnoreCase);
+                                                                    wsEnv["websocket.SendAsyncFunc"] = WebSocketSendAsync(webSocket);
+                                                                    wsEnv["websocket.ReceiveAsyncFunc"] = WebSocketReceiveAsync(webSocket);
+                                                                    wsEnv["websocket.CloseAsyncFunc"] = WebSocketCloseAsync(webSocket);
+                                                                    wsEnv["websocket.Version"] = "1.0";
+                                                                    wsEnv["websocket.CallCancelled"] = CancellationToken.None;
+                                                                    wsEnv["aspnet.AspNetWebSocketContext"] = websocketContext;
+
+                                                                    await wsBodyDelegate(wsEnv);
 
                                                                     switch (webSocket.State)
                                                                     {
@@ -255,7 +241,7 @@ namespace SimpleOwinAspNetHost.Middlewares
             return async (buffer, cancel) =>
             {
                 var nativeResult = await webSocket.ReceiveAsync(buffer, cancel);
-                return new WebSocketReceiveResultTuple(
+                return new WebSocketReceiveTuple(
                     EnumToOpCode(nativeResult.MessageType),
                     nativeResult.EndOfMessage,
                     (nativeResult.MessageType == WebSocketMessageType.Close ? null : (int?)nativeResult.Count),

@@ -6,7 +6,7 @@
 <body>
     <script>
         //var wsUri = "ws://echo.websocket.org/";
-        var wsUri = "ws://localhost/SimpleOwinAspNetHost/websocket/helloworld/autodetect";
+        var wsUri = "ws://localhost:1728/websocket/helloworld/autodetect";
         var output, websocket;
         function init() {
             output = document.getElementById("output");
@@ -47,7 +47,7 @@
     </script>
     <h2>WebSocket Test</h2>
     <p>Does not require #define ASPNET_WEBSOCKETS (AspNetWebSocketMiddleware will auto detect if asp.net supports web sockets).
-        Requires full IIS 8+ on Win8+ for WebSockets to work.</p>
+        Requires IIS 8+ on Win8+ for WebSockets to work.</p>
     <div id="output"></div>
 </body>
 </html>

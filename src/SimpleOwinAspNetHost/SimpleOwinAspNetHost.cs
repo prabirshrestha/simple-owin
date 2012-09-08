@@ -246,7 +246,7 @@ namespace SimpleOwinAspNetHost
             if (context.IsWebSocketRequest)
             {
                 env["websocket.Version"] = "1.0";
-                env["websocket.Support"] = "WebSocketFunc";                
+                env["websocket.Support"] = "WebSocketFunc";
             }
 #endif
 
@@ -279,7 +279,7 @@ namespace SimpleOwinAspNetHost
                                                       var wsEnv = new Dictionary<string, object>(StringComparer.OrdinalIgnoreCase);
                                                       wsEnv["websocket.SendAsyncFunc"] = WebSocketSendAsync(webSocket);
                                                       wsEnv["websocket.ReceiveAsyncFunc"] = WebSocketReceiveAsync(webSocket);
-                                                      wsEnv["websocket.CloseAsyncFunc"] = WebSocketReceiveAsync(webSocket);
+                                                      wsEnv["websocket.CloseAsyncFunc"] = WebSocketCloseAsync(webSocket);
                                                       wsEnv["websocket.Version"] = "1.0";
                                                       wsEnv["websocket.CallCancelled"] = CancellationToken.None;
                                                       wsEnv["aspnet.AspNetWebSocketContext"] = websocketContext;
