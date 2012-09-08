@@ -361,6 +361,13 @@ namespace SimpleOwinAspNetHost
         {
             var properties = new Dictionary<string, object>(StringComparer.OrdinalIgnoreCase);
             properties[OwinConstants.Version] = "1.0";
+#if ASPNET_WEBSOCKETS
+            if (Environment.OSVersion.Platform == PlatformID.Win32NT && Environment.OSVersion.Version >= new Version(6, 2) || HttpRuntime.IISVersion != null && HttpRuntime.IISVersion.Major >= 8)
+            {
+                properties["websocket.Version"] = "1.0";
+                properties["websocket.Support"] = "WebSocketFunc";
+            }
+#endif
             return properties;
         }
 
