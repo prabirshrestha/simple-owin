@@ -77,7 +77,7 @@ namespace SimpleOwinAspNetHost.Samples.WebSockets.Helloworld
                         var wsRecieveAsync = (WebSocketReceiveAsync)env["websocket.ReceiveAsyncFunc"];
                         var wsCloseAsync = (WebSocketCloseAsync)env["websocket.CloseAsyncFunc"];
                         var wsVersion = (WebSocketReceiveAsync)env["websocket.Version"];
-                        var wsCallCancelled = (WebSocketReceiveAsync)env["websocket.CallCancelled"];
+                        var wsCallCancelled = (CancellationToken)env["websocket.CallCancelled"];
 
                         // note: make sure to catch errors when calling sendAsync, receiveAsync and closeAsync
                         // for simiplicity this code does not handle errors

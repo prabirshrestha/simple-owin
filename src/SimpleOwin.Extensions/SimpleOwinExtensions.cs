@@ -4,9 +4,46 @@
     using System.Collections.Generic;
     using System.IO;
     using System.Linq;
+    using System.Threading;
     using System.Threading.Tasks;
 
     using AppFunc = System.Func<System.Collections.Generic.IDictionary<string, object>, System.Threading.Tasks.Task>;
+
+    using WebSocketFunc =
+       System.Func<
+           System.Collections.Generic.IDictionary<string, object>, // WebSocket Environment
+           System.Threading.Tasks.Task>; // Complete
+
+    using WebSocketSendAsync = System.Func<
+                System.ArraySegment<byte>, // data
+                int, // message type
+                bool, // end of message
+                System.Threading.CancellationToken, // cancel
+                System.Threading.Tasks.Task>;
+
+    using WebSocketReceiveTuple = System.Tuple<
+                        int, // messageType
+                        bool, // endOfMessage
+                        int?, // count
+                        int?, // closeStatus
+                        string>; // closeStatusDescription
+
+    using WebSocketReceiveAsync = System.Func<
+                System.ArraySegment<byte>, // data
+                System.Threading.CancellationToken, // cancel
+                System.Threading.Tasks.Task<
+                    System.Tuple< // WebSocketReceiveTuple
+                        int, // messageType
+                        bool, // endOfMessage
+                        int?, // count
+                        int?, // closeStatus
+                        string>>>; // closeStatusDescription
+
+    using WebSocketCloseAsync = System.Func<
+                int, // closeStatus
+                string, // closeDescription
+                System.Threading.CancellationToken, // cancel
+                System.Threading.Tasks.Task>;
 
     public static class SimpleOwinExtensions
     {
@@ -219,6 +256,31 @@
 
             apps.Add(next => env => condition(env) ? callback(next)(env) : next(env));
             return apps;
+        }
+
+        public static string GetOwinWebSocketsVersion(this IDictionary<string, object> wsEnv)
+        {
+            return wsEnv.GetOwinEnvironmentValue<string>("websocket.Version");
+        }
+
+        public static WebSocketSendAsync GetOwinWebSocketsSendAsync(this IDictionary<string, object> wsEnv)
+        {
+            return wsEnv.GetOwinEnvironmentValue<WebSocketSendAsync>("websocket.SendAsyncFunc");
+        }
+
+        public static WebSocketReceiveAsync GetOwinWebSocketsReceiveAsync(this IDictionary<string, object> wsEnv)
+        {
+            return wsEnv.GetOwinEnvironmentValue<WebSocketReceiveAsync>("websocket.ReceiveAsyncFunc");
+        }
+
+        public static WebSocketCloseAsync GetOwinWebSocketsCloseAsync(this IDictionary<string, object> wsEnv)
+        {
+            return wsEnv.GetOwinEnvironmentValue<WebSocketCloseAsync>("websocket.CloseAsyncFunc");
+        }
+
+        public static CancellationToken GetOwinWebSocketCallCancelled(this IDictionary<string, object> wsEnv)
+        {
+            return wsEnv.GetOwinEnvironmentValue<CancellationToken>("websocket.CallCancelled");
         }
     }
 }
