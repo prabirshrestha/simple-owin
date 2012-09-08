@@ -54,7 +54,7 @@
 
             router.All("*", NotFound.Middleware());
 
-            return app.ToOwinAppFunc();
+            return app.ToOwinApp();
         }
     }
 }

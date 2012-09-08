@@ -222,7 +222,7 @@
             return app;
         }
 
-        public static AppFunc ToOwinAppFunc(this IEnumerable<Func<AppFunc, AppFunc>> app)
+        public static AppFunc ToOwinApp(this IEnumerable<Func<AppFunc, AppFunc>> app)
         {
             var enumerable = app as Func<AppFunc, AppFunc>[] ?? app.ToArray();
             var apps = enumerable.ToList();
