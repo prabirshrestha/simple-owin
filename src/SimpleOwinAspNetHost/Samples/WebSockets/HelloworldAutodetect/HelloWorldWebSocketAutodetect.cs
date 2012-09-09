@@ -118,7 +118,7 @@ namespace SimpleOwinAspNetHost.Samples.WebSockets.HelloworldAutodetect
         public static IEnumerable<Func<AppFunc, AppFunc>> OwinApps()
         {
             var app = new List<Func<AppFunc, AppFunc>>();
-            app.Add(AspNetWebSocketMiddleware.Middleware());
+            app.Add(AspNetWebSocketMiddleware.Middleware(autodetect: true, replace: false, httpContextBaseKey: "aspnet.HttpContextBase"));
             app.Add(MainHelloworldSocketApp());
             return app;
         }

@@ -148,7 +148,7 @@ namespace SimpleOwinAspNetHost.Middlewares
             return source => (T)compiled(source);
         }
 
-        public static Func<AppFunc, AppFunc> Middleware(bool autodetect = true, string httpContextBaseKey = "aspnet.HttpContextBase")
+        public static Func<AppFunc, AppFunc> Middleware(bool autodetect = true, bool replace = false, string httpContextBaseKey = "aspnet.HttpContextBase")
         {
             var ws = new AspNetWebSocketMiddleware(autodetect);
 
@@ -160,6 +160,13 @@ namespace SimpleOwinAspNetHost.Middlewares
             return app =>
                 async env =>
                 {
+                    bool containsWebSocketSupport = env.ContainsKey("websocket.Support");
+                    if (!replace && containsWebSocketSupport)
+                    {
+                        await app(env);
+                        return;
+                    }
+
                     var httpWebContext = Get<object>(env, httpContextBaseKey, null);
                     if (httpWebContext == null)
                     {
@@ -168,9 +175,7 @@ namespace SimpleOwinAspNetHost.Middlewares
                     }
 
                     if (ws._isWebSocketRequest(httpWebContext))
-                    {
                         env["websocket.Support"] = "WebSocketFunc";
-                    }
 
                     await app(env);
 
@@ -220,6 +225,9 @@ namespace SimpleOwinAspNetHost.Middlewares
                                                                     //response.Close();
                                                                 })
                                    });
+
+                        if (containsWebSocketSupport)
+                            env.Remove("websocket.Func");
                     }
                 };
         }
