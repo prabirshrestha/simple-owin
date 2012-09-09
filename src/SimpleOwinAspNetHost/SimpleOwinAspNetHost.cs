@@ -136,23 +136,12 @@ namespace SimpleOwinAspNetHost
             if (apps == null)
                 throw new ArgumentNullException("apps");
 
-            var appList = apps.ToList();
-
             return
                 env =>
                 {
+                    var enumerator = apps.GetEnumerator();
                     AppFunc next = null;
-                    int index = 0;
-
-                    next = env2 =>
-                    {
-                        if (index == appList.Count)
-                            return CompletedTask; // we are done
-
-                        Func<AppFunc, AppFunc> other = appList[index++];
-                        return other(env3 => next(env3))(env2);
-                    };
-
+                    next = env2 => enumerator.MoveNext() ? enumerator.Current(env3 => next(env3))(env2) : CompletedTask;
                     return next(env);
                 };
         }

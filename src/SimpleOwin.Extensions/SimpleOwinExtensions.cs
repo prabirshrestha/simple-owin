@@ -224,27 +224,12 @@
 
         public static AppFunc ToOwinApp(this IEnumerable<Func<AppFunc, AppFunc>> app)
         {
-            var enumerable = app as Func<AppFunc, AppFunc>[] ?? app.ToArray();
-            var apps = enumerable.ToList();
-
-            if (!enumerable.Any())
-                throw new ArgumentException("IEnumerable<Func<AppFunc, AppFunc>> should contain at least one app.");
-
             return
                 env =>
                 {
+                    var enumerator = app.GetEnumerator();
                     AppFunc next = null;
-                    int index = 0;
-
-                    next = env2 =>
-                    {
-                        Func<AppFunc, AppFunc> other = apps[index++];
-
-                        // ReSharper disable AccessToModifiedClosure
-                        return index == apps.Count ? other(env3 => CachedCompletedResultTupleTask)(env2) : other(env3 => next(env3))(env2);
-                        // ReSharper restore AccessToModifiedClosure
-                    };
-
+                    next = env2 => enumerator.MoveNext() ? enumerator.Current(env3 => next(env3))(env2) : CachedCompletedResultTupleTask;
                     return next(env);
                 };
         }

@@ -103,18 +103,9 @@ namespace SimpleOwinAspNetHost.Samples
             return
                 env =>
                 {
+                    var enumerator = apps.GetEnumerator();
                     AppFunc next = null;
-                    int index = 0;
-
-                    next = env2 =>
-                               {
-                                   if (index == apps.Count)
-                                       return CachedCompletedResultTupleTask; // we are done
-
-                                   Func<AppFunc, AppFunc> other = apps[index++];
-                                   return other(env3 => next(env3))(env2);
-                               };
-
+                    next = env2 => enumerator.MoveNext() ? enumerator.Current(env3 => next(env3))(env2) : CachedCompletedResultTupleTask;
                     return next(env);
                 };
         }
