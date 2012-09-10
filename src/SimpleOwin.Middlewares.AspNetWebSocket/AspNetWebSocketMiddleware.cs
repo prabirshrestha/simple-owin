@@ -1,6 +1,6 @@
 ﻿// https://github.com/prabirshrestha/simple-owin
 
-namespace SimpleOwinAspNetHost.Middlewares
+namespace SimpleOwin.Middlewares.AspNetWebSocket
 {
     using System;
     using System.Collections.Generic;

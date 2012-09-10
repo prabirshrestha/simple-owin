@@ -10,8 +10,7 @@ namespace SimpleOwinAspNetHost.Samples.WebSockets.HelloworldAutodetect
     using System.Text;
     using System.Threading;
     using System.Threading.Tasks;
-    using SimpleOwinAspNetHost.Middlewares;
-
+    using SimpleOwin.Middlewares.AspNetWebSocket;
     using AppFunc = System.Func<System.Collections.Generic.IDictionary<string, object>, System.Threading.Tasks.Task>;
 
     using WebSocketFunc =
