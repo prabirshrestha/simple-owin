@@ -265,6 +265,13 @@
             return app;
         }
 
+        public static T Use<T>(this T app, Func<Env, bool> condition, Func<AppFunc, AppFunc> middleware)
+          where T : ICollection<Func<AppFunc, AppFunc>>
+        {
+            app.Add(next => env => condition(env) ? middleware(next)(env) : next(env));
+            return app;
+        }
+
         public static AppFunc ToOwinApp(this IEnumerable<Func<AppFunc, AppFunc>> app)
         {
             return

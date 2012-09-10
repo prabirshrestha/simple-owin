@@ -17,7 +17,7 @@
 
             app
                 .Use(H5bp.IeEdgeChromeFrameHeader())
-                .Use(H5bp.RemovePoweredBy())    
+                .Use(H5bp.RemovePoweredBy())
                 .Use(H5bp.CrossDomainRules());
 
             // Instead of Use extension method you can use Add.
