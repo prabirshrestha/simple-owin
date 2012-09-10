@@ -17,7 +17,10 @@
                 next =>
                 env =>
                 {
-                    var userAgent = env.GetOwinRequestHeaderValue("user-agent");
+                    var userAgent = env
+                        .GetOwinRequestHeaders()
+                        .GetOwinHeaderValue("user-agent");
+
                     if (!string.IsNullOrWhiteSpace(userAgent) && userAgent.IndexOf("MSIE", StringComparison.Ordinal) > 1)
                     {
                         // todo: only for html/htm requests

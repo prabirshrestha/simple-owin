@@ -18,7 +18,10 @@
                     if (env.ContainsKey("simpleOwin.body"))
                         return next(env);
 
-                    var contentType = env.GetOwinRequestHeaderValues("content-type");
+                    var contentType = env
+                        .GetOwinRequestHeaders()
+                        .GetOwinHeaderValues("content-type");
+
                     if (contentType == null)
                         return next(env);
 

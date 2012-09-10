@@ -18,13 +18,13 @@
                 next =>
                 env =>
                 {
-                    env
-                        .SetOwinResponseStatusCode(404)
-                        .GetOwinResponseHeaders(headers =>
-                                                    {
-                                                        if (!string.IsNullOrWhiteSpace(contentType))
-                                                            headers.SetOwinHeader("Content-Type", contentType);
-                                                    });
+                    if (!string.IsNullOrWhiteSpace(contentType))
+                    {
+                        var headers = env
+                            .SetOwinResponseStatusCode(404)
+                            .GetOwinResponseHeaders();
+                        headers.SetOwinHeader("content-type", contentType);
+                    }
 
                     env
                         .GetOwinResponseBody()

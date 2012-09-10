@@ -3,30 +3,19 @@
     using System;
     using System.Collections.Generic;
     using System.IO;
-    using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
 
+    using Env = System.Collections.Generic.IDictionary<string, object>;
+    using WsEnv = System.Collections.Generic.IDictionary<string, object>;
+
     using AppFunc = System.Func<System.Collections.Generic.IDictionary<string, object>, System.Threading.Tasks.Task>;
 
-    using WebSocketFunc =
-       System.Func<
-           System.Collections.Generic.IDictionary<string, object>, // WebSocket Environment
-           System.Threading.Tasks.Task>; // Complete
-
-    using WebSocketSendAsync = System.Func<
-                System.ArraySegment<byte>, // data
-                int, // message type
-                bool, // end of message
-                System.Threading.CancellationToken, // cancel
-                System.Threading.Tasks.Task>;
-
-    using WebSocketReceiveTuple = System.Tuple<
-                        int, // messageType
-                        bool, // endOfMessage
-                        int?, // count
-                        int?, // closeStatus
-                        string>; // closeStatusDescription
+    using WebSocketCloseAsync = System.Func<
+                    int, // closeStatus
+                    string, // closeDescription
+                    System.Threading.CancellationToken, // cancel
+                    System.Threading.Tasks.Task>; // closeStatusDescription
 
     using WebSocketReceiveAsync = System.Func<
                 System.ArraySegment<byte>, // data
@@ -39,123 +28,101 @@
                         int?, // closeStatus
                         string>>>; // closeStatusDescription
 
-    using WebSocketCloseAsync = System.Func<
-                int, // closeStatus
-                string, // closeDescription
+    using WebSocketSendAsync = System.Func<
+                System.ArraySegment<byte>, // data
+                int, // message type
+                bool, // end of message
                 System.Threading.CancellationToken, // cancel
                 System.Threading.Tasks.Task>;
 
     public static class SimpleOwinExtensions
     {
-        public static readonly Task CachedCompletedResultTupleTask;
+        public static readonly Task NoopTask;
 
         static SimpleOwinExtensions()
         {
             var tcs = new TaskCompletionSource<int>();
             tcs.TrySetResult(0);
-            CachedCompletedResultTupleTask = tcs.Task;
+            NoopTask = tcs.Task;
         }
 
-        public static string GetOwinRequestMethod(this IDictionary<string, object> env)
+        public static T GetOwinStartupValue<T>(this IDictionary<string, object> startup, string name, T defaultValue = default(T))
+        {
+            object value;
+            return startup.TryGetValue(name, out value) && value is T ? (T)value : defaultValue;
+        }
+
+        public static T GetOwinEnvironmentValue<T>(this Env env, string name, T defaultValue = default(T))
+        {
+            object value;
+            return env.TryGetValue(name, out value) && value is T ? (T)value : defaultValue;
+        }
+
+        public static Env SetOwinStartupValue(this IDictionary<string, object> startup, string name, object value)
+        {
+            startup[name] = value;
+            return startup;
+        }
+
+        public static IDictionary<string, object> SetOwinEnvironmentValue(this Env env, string name, object value)
+        {
+            env[name] = value;
+            return env;
+        }
+
+        public static string GetOwinRequestMethod(this Env env)
         {
             return env.GetOwinEnvironmentValue<string>("owin.RequestMethod");
         }
 
-        public static IDictionary<string, object> SetOwinRequestMethod(this IDictionary<string, object> env, string method)
-        {
-            env["owin.RequestMethod"] = method;
-            return env;
-        }
-
-        public static string GetOwinRequestScheme(this IDictionary<string, object> env)
+        public static string GetOwinRequestScheme(this Env env)
         {
             return env.GetOwinEnvironmentValue<string>("owin.RequestScheme");
         }
 
-        public static string GetOwinRequestPathBase(this IDictionary<string, object> env)
+        public static string GetOwinRequestPathBase(this Env env)
         {
             return env.GetOwinEnvironmentValue<string>("owin.RequestPathBase");
         }
 
-        public static string GetOwinRequestPath(this IDictionary<string, object> env)
+        public static string GetOwinRequestPath(this Env env)
         {
             return env.GetOwinEnvironmentValue<string>("owin.RequestPath");
         }
 
-        public static string GetOwinRequestQueryString(this IDictionary<string, object> env)
+        public static string GetOwinRequestQueryString(this Env env)
         {
             return env.GetOwinEnvironmentValue<string>("owin.RequestQueryString");
         }
 
-        public static Stream GetOwinRequestBody(this IDictionary<string, object> env)
+        public static Stream GetOwinRequestBody(this Env env)
         {
             return env.GetOwinEnvironmentValue<Stream>("owin.RequestBody");
         }
 
-        public static string GetOwinCallCancelled(this IDictionary<string, object> env)
+        public static string GetOwinCallCancelled(this Env env)
         {
             return env.GetOwinEnvironmentValue<string>("owin.CallCancelled");
         }
 
-        public static string GetOwinServerClientIp(this IDictionary<string, object> env)
-        {
-            return env.GetOwinEnvironmentValue<string>("server.CLIENT_IP");
-        }
-
-        public static IDictionary<string, string[]> GetOwinRequesteHeaders(this IDictionary<string, object> env)
+        public static IDictionary<string, string[]> GetOwinRequestHeaders(this Env env)
         {
             return env.GetOwinEnvironmentValue<IDictionary<string, string[]>>("owin.RequestHeaders");
         }
 
-        public static IDictionary<string, object> GetOwinRequesteHeaders(this IDictionary<string, object> env, Action<IDictionary<string, string[]>> callback)
+        public static string GetOwinServerClientIp(this Env env)
         {
-            var headers = env.GetOwinResponseHeaders();
-            if (callback != null)
-                callback(headers);
-            return env;
+            return env.GetOwinEnvironmentValue<string>("server.CLIENT_IP");
         }
 
-        public static IDictionary<string, string[]> GetOwinResponseHeaders(this IDictionary<string, object> env)
+        public static IDictionary<string, string[]> GetOwinResponseHeaders(this Env env)
         {
             return env.GetOwinEnvironmentValue<IDictionary<string, string[]>>("owin.ResponseHeaders");
         }
 
-        public static IDictionary<string, object> GetOwinResponseHeaders(this IDictionary<string, object> env, Action<IDictionary<string, string[]>> callback)
-        {
-            var headers = env.GetOwinResponseHeaders();
-            if (callback != null)
-                callback(headers);
-            return env;
-        }
-
-        public static Stream GetOwinResponseBody(this IDictionary<string, object> env)
+        public static Stream GetOwinResponseBody(this Env env)
         {
             return env.GetOwinEnvironmentValue<Stream>("owin.ResponseBody");
-        }
-
-        public static IDictionary<string, object> SetOwinResponseStatusCode(this IDictionary<string, object> env, int statusCode)
-        {
-            env["owin.ResponseStatusCode"] = statusCode;
-            return env;
-        }
-
-        public static IDictionary<string, string[]> SetOwinHeader(this IDictionary<string, string[]> headers, string name, string[] value)
-        {
-            headers[name] = value;
-            return headers;
-        }
-
-        public static IDictionary<string, string[]> SetOwinHeader(this IDictionary<string, string[]> headers, string name, string value)
-        {
-            headers[name] = new[] { value };
-            return headers;
-        }
-
-        public static IDictionary<string, string[]> RemoveOwinHeader(this IDictionary<string, string[]> headers, string name)
-        {
-            if (headers.ContainsKey(name))
-                headers.Remove(name);
-            return headers;
         }
 
         public static string[] GetOwinHeaderValues(this IDictionary<string, string[]> headers, string name, string[] defaultValue = null)
@@ -182,41 +149,117 @@
             }
         }
 
-        public static string[] GetOwinRequestHeaderValues(this IDictionary<string, object> env, string name, string[] defaultValue = null)
+        public static Env SetOwinRequestMethod(this Env env, string method)
         {
-            return env
-                .GetOwinRequesteHeaders()
-                .GetOwinHeaderValues(name, defaultValue);
+            return env.SetOwinEnvironmentValue("owin.RequestMethod", method);
         }
 
-        public static string GetOwinRequestHeaderValue(this IDictionary<string, object> env, string name)
+        public static Env SetOwinRequestScheme(this Env env, string scheme)
         {
-            return env
-                .GetOwinRequesteHeaders()
-                .GetOwinHeaderValue(name);
+            return env.SetOwinEnvironmentValue("owin.RequestScheme", scheme);
         }
 
-        public static string[] GetOwinResponseHeaderValues(this IDictionary<string, object> env, string name, string[] defaultValue = null)
+        public static Env SetOwinRequestPathBase(this Env env, string pathBase)
         {
-            return env
-                .GetOwinResponseHeaders()
-                .GetOwinHeaderValues(name, defaultValue);
+            return env.SetOwinEnvironmentValue("owin.RequestPathBase", pathBase);
         }
 
-        public static string GetOwinResponseHeaderValue(this IDictionary<string, object> env, string name)
+        public static Env SetOwinRequestPath(this Env env, string path)
         {
-            return env
-                .GetOwinResponseHeaders()
-                .GetOwinHeaderValue(name);
+            return env.SetOwinEnvironmentValue("owin.RequestPath", path);
         }
 
-        public static T GetOwinEnvironmentValue<T>(this IDictionary<string, object> env, string name, T defaultValue = default(T))
+        public static Env SetOwinRequestQueryString(this Env env, string queryString)
         {
-            object value;
-            return env.TryGetValue(name, out value) && value is T ? (T)value : defaultValue;
+            return env.SetOwinEnvironmentValue("owin.RequestQueryString", queryString);
         }
 
-        public static ICollection<Func<AppFunc, AppFunc>> Use(this ICollection<Func<AppFunc, AppFunc>> app, Func<AppFunc, AppFunc> middleware)
+        public static Env SetOwinRequestBody(this Env env, Stream stream)
+        {
+            return env.SetOwinEnvironmentValue("owin.RequestBody", stream);
+        }
+
+        public static Env SetOwinCallCancelled(this Env env, CancellationToken cancellationToken)
+        {
+            return env.SetOwinEnvironmentValue("owin.CallCancelled", cancellationToken);
+        }
+
+        public static Env SetOwinResponseStatusCode(this Env env, int statusCode)
+        {
+            return env.SetOwinEnvironmentValue("owin.ResponseStatusCode", statusCode);
+        }
+
+        public static IDictionary<string, string[]> SetOwinHeader(this IDictionary<string, string[]> headers, string name, string[] value)
+        {
+            headers[name] = value;
+            return headers;
+        }
+
+        public static IDictionary<string, string[]> SetOwinHeader(this IDictionary<string, string[]> headers, string name, string value)
+        {
+            headers[name] = new[] { value };
+            return headers;
+        }
+
+        public static IDictionary<string, string[]> RemoveOwinHeader(this IDictionary<string, string[]> headers, string name)
+        {
+            if (headers.ContainsKey(name))
+                headers.Remove(name);
+            return headers;
+        }
+
+        public static string GetOwinWebSocketsVersion(this WsEnv wsEnv)
+        {
+            return wsEnv.GetOwinEnvironmentValue<string>("websocket.Version");
+        }
+
+        public static WebSocketSendAsync GetOwinWebSocketsSendAsync(this WsEnv wsEnv)
+        {
+            return wsEnv.GetOwinEnvironmentValue<WebSocketSendAsync>("websocket.SendAsyncFunc");
+        }
+
+        public static WebSocketReceiveAsync GetOwinWebSocketsReceiveAsync(this WsEnv wsEnv)
+        {
+            return wsEnv.GetOwinEnvironmentValue<WebSocketReceiveAsync>("websocket.ReceiveAsyncFunc");
+        }
+
+        public static WebSocketCloseAsync GetOwinWebSocketsCloseAsync(this WsEnv wsEnv)
+        {
+            return wsEnv.GetOwinEnvironmentValue<WebSocketCloseAsync>("websocket.CloseAsyncFunc");
+        }
+
+        public static CancellationToken GetOwinWebSocketCallCancelled(this WsEnv wsEnv)
+        {
+            return wsEnv.GetOwinEnvironmentValue<CancellationToken>("websocket.CallCancelled");
+        }
+
+        public static WsEnv SetOwinWebSocketsVersion(this WsEnv wsEnv, string version)
+        {
+            return wsEnv.SetOwinEnvironmentValue("websocket.Version", version);
+        }
+
+        public static WsEnv SetOwinWebSocketsSendAsync(this WsEnv wsEnv, string version)
+        {
+            return wsEnv.SetOwinEnvironmentValue("websocket.SendAsyncFunc", version);
+        }
+
+        public static WsEnv SetOwinWebSocketsReceiveAsync(this WsEnv wsEnv, string version)
+        {
+            return wsEnv.SetOwinEnvironmentValue("websocket.ReceiveAsyncFunc", version);
+        }
+
+        public static WsEnv SetOwinWebSocketsCloseAsync(this WsEnv wsEnv, string version)
+        {
+            return wsEnv.SetOwinEnvironmentValue("websocket.CloseAsyncFunc", version);
+        }
+
+        public static WsEnv SetOwinWebSocketCallCancelled(this WsEnv wsEnv, string version)
+        {
+            return wsEnv.SetOwinEnvironmentValue("websocket.CallCancelled", version);
+        }
+
+        public static T Use<T>(this T app, Func<AppFunc, AppFunc> middleware)
+            where T : ICollection<Func<AppFunc, AppFunc>>
         {
             app.Add(middleware);
             return app;
@@ -229,43 +272,10 @@
                 {
                     var enumerator = app.GetEnumerator();
                     AppFunc next = null;
-                    next = env2 => enumerator.MoveNext() ? enumerator.Current(env3 => next(env3))(env2) : CachedCompletedResultTupleTask;
+                    next = env2 => enumerator.MoveNext() ? enumerator.Current(env3 => next(env3))(env2) : NoopTask;
                     return next(env);
                 };
         }
 
-        public static ICollection<Func<AppFunc, AppFunc>> SimpleOwinAddIf(this ICollection<Func<AppFunc, AppFunc>> apps, Func<IDictionary<string, object>, bool> condition, Func<AppFunc, AppFunc> callback)
-        {
-            if (callback == null)
-                throw new ArgumentNullException("callback");
-
-            apps.Add(next => env => condition(env) ? callback(next)(env) : next(env));
-            return apps;
-        }
-
-        public static string GetOwinWebSocketsVersion(this IDictionary<string, object> wsEnv)
-        {
-            return wsEnv.GetOwinEnvironmentValue<string>("websocket.Version");
-        }
-
-        public static WebSocketSendAsync GetOwinWebSocketsSendAsync(this IDictionary<string, object> wsEnv)
-        {
-            return wsEnv.GetOwinEnvironmentValue<WebSocketSendAsync>("websocket.SendAsyncFunc");
-        }
-
-        public static WebSocketReceiveAsync GetOwinWebSocketsReceiveAsync(this IDictionary<string, object> wsEnv)
-        {
-            return wsEnv.GetOwinEnvironmentValue<WebSocketReceiveAsync>("websocket.ReceiveAsyncFunc");
-        }
-
-        public static WebSocketCloseAsync GetOwinWebSocketsCloseAsync(this IDictionary<string, object> wsEnv)
-        {
-            return wsEnv.GetOwinEnvironmentValue<WebSocketCloseAsync>("websocket.CloseAsyncFunc");
-        }
-
-        public static CancellationToken GetOwinWebSocketCallCancelled(this IDictionary<string, object> wsEnv)
-        {
-            return wsEnv.GetOwinEnvironmentValue<CancellationToken>("websocket.CallCancelled");
-        }
     }
 }

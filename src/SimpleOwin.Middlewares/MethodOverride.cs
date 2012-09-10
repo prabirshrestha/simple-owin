@@ -18,7 +18,9 @@
                 {
                     string originalMethod = env.GetOwinRequestMethod();
 
-                    var method = env.GetOwinRequestHeaderValue("x-http-method-override");
+                    var method = env
+                        .GetOwinRequestHeaders()
+                        .GetOwinHeaderValue("x-http-method-override");
 
                     if (string.IsNullOrWhiteSpace(method))
                     {
