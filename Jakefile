@@ -52,7 +52,8 @@ namespace('nuget', function () {
     task('pack', [
         'nuget:pack:SimpleOwin.Extensions',
         'nuget:pack:SimpleOwin.Extensions.Source',
-        'nuget:pack:SimpleOwin.Extensions.SymbolSource'
+        'nuget:pack:SimpleOwin.Extensions.SymbolSource',
+        'nuget:pack:SimpleOwin.Hosts.AspNet.Source'        
     ])
 
     namespace('pack', function () {
@@ -87,6 +88,24 @@ namespace('nuget', function () {
 
             nuget.pack({
                 nuspec: 'src/nuspec/SimpleOwin.Extensions.Source.nuspec',
+                version: config.version,
+                outputDirectory: 'dist/'
+            })
+
+        }, { async: true })
+
+        task('SimpleOwin.Hosts.AspNet.Source', ['working/', 'dist/', 'build'], function () {
+            console.log('Generating working/SimpleOwinAspNetHost.cs');
+
+            var csFile = fs
+                .readFileSync('src/SimpleOwin.Hosts.AspNet/SimpleOwinAspNetHost.cs', 'utf-8')
+                .replace('// VERSION:', '// VERSION: ' + config.version)
+                .replace('namespace SimpleOwin.Hosts.AspNet', 'namespace $rootnamespace$')
+                .replace(/public class/g, 'internal class');
+            fs.writeFileSync('working/SimpleOwinAspNetHost.cs.pp', csFile);
+
+            nuget.pack({
+                nuspec: 'src/nuspec/SimpleOwin.Hosts.AspNet.Source.nuspec',
                 version: config.version,
                 outputDirectory: 'dist/'
             })

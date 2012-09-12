@@ -1,5 +1,6 @@
 ﻿//#define ASPNET_WEBSOCKETS
 
+// VERSION: 
 // https://github.com/prabirshrestha/simple-owin
 
 namespace SimpleOwin.Hosts.AspNet
