@@ -1,0 +1,23 @@
+<?xml version='1.0'?>
+<package xmlns='http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd'>
+    <metadata>
+        <id>SimpleOwin.Extensions</id>
+        <version>$version$</version>
+        <title/>
+        <authors>Prabir Shrestha</authors>
+        <owners>Prabir Shrestha</owners>
+        <description>Extension methods for OWIN.</description>
+        <language>en-US</language>
+        <licenseUrl>https://github.com/prabirshrestha/simple-owin/LICENSE.txt</licenseUrl>
+        <projectUrl>https://github.com/prabirshrestha/simple-owin</projectUrl>
+        <requireLicenseAcceptance>false</requireLicenseAcceptance>
+        <tags>OWIN SimpleOwin</tags>
+    </metadata>
+    <files>
+        <file src="..\..\..\LICENSE.txt" target="LICENSE.txt" />
+        <file src="..\..\..\bin\SimpleOwin.Extensions\SimpleOwin.Extensions.dll" target="lib\net40" />
+        <file src="..\..\..\bin\SimpleOwin.Extensions\SimpleOwin.Extensions.xml" target="lib\net40" />
+        <file src="..\..\SimpleOwin.Extensions\SimpleOwinExtensions.cs" target = "src\SimpleOwin.Extensions\" />
+        <file src="..\..\SimpleOwin.Extensions\Properties\AssemblyInfo.cs" target = "src\SimpleOwin.Extensions\Properties\" />
+    </files>
+</package>
