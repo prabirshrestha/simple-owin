@@ -1,7 +1,7 @@
 ﻿
-// VERSION: 
+// VERSION: 0.0.1 
 
-namespace SimpleOwin.Extensions
+namespace $rootnamespace$
 {
     using System;
     using System.Collections.Generic;
@@ -38,7 +38,7 @@ namespace SimpleOwin.Extensions
                 System.Threading.CancellationToken, // cancel
                 System.Threading.Tasks.Task>;
 
-    public static class SimpleOwinExtensions
+    internal static class SimpleOwinExtensions
     {
         public static readonly Task NoopTask;
 

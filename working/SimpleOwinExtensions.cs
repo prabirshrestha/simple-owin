@@ -1,7 +1,4 @@
-﻿
-// VERSION: 
-
-namespace SimpleOwin.Extensions
+﻿namespace SimpleOwin.Extensions
 {
     using System;
     using System.Collections.Generic;

@@ -24,6 +24,7 @@ nuget.setDefaults({
 task('default', ['build'])
 
 directory('dist/')
+directory('working/')
 
 desc('Build')
 task('build', function () {
@@ -47,7 +48,10 @@ task('clean', function () {
 
 namespace('nuget', function () {
 
-	task('pack', ['nuget:pack:SimpleOwin.Extensions'])
+	task('pack', [
+		'nuget:pack:SimpleOwin.Extensions',
+		'nuget:pack:SimpleOwin.Extensions.Source'
+	])
 
     namespace('pack', function () {
 
@@ -57,6 +61,24 @@ namespace('nuget', function () {
                 version: config.version,
                 outputDirectory: 'dist/'
             })
+        }, { async: true })
+
+		task('SimpleOwin.Extensions.Source', ['working/', 'dist/', 'build'], function () {
+			console.log('Generating working/SimpleOwinExtensions.cs.pp');
+
+			var csFile = fs
+				.readFileSync('src/SimpleOwin.Extensions/SimpleOwinExtensions.cs', 'utf-8')
+				.replace('// VERSION:', '// VERSION: ' + config.version)
+				.replace('namespace SimpleOwin.Extensions', 'namespace $rootnamespace$')
+				.replace('public static class', 'internal static class');
+			fs.writeFileSync('working/SimpleOwinExtensions.cs.pp', csFile);
+
+            nuget.pack({
+                nuspec: 'src/nuspec/SimpleOwin.Extensions.Source.nuspec',
+                version: config.version,
+                outputDirectory: 'dist/'
+            })
+
         }, { async: true })
 
 	})
