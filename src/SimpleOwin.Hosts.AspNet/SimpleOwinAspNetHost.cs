@@ -127,11 +127,11 @@ namespace SimpleOwin.Hosts.AspNet
         }
 
         public SimpleOwinAspNetHandler(IEnumerable<Func<AppFunc, AppFunc>> apps, string root)
-            : this(ConvertApp(apps), root)
+            : this(ToOwinApp(apps), root)
         {
         }
 
-        public static AppFunc ConvertApp(IEnumerable<Func<AppFunc, AppFunc>> apps)
+        public static AppFunc ToOwinApp(IEnumerable<Func<AppFunc, AppFunc>> apps)
         {
             if (apps == null)
                 throw new ArgumentNullException("apps");
