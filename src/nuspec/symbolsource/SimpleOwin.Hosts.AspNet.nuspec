@@ -1,0 +1,27 @@
+<?xml version='1.0'?>
+<package xmlns='http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd'>
+    <metadata>
+        <id>SimpleOwin.Hosts.AspNet</id>
+        <version>$version$</version>
+        <title/>
+        <authors>Prabir Shrestha</authors>
+        <owners>Prabir Shrestha</owners>
+        <description>ASP.NET OWIN host with WebSockets extension.</description>
+        <language>en-US</language>
+        <licenseUrl>https://github.com/prabirshrestha/simple-owin/LICENSE.txt</licenseUrl>
+        <projectUrl>https://github.com/prabirshrestha/simple-owin</projectUrl>
+        <requireLicenseAcceptance>false</requireLicenseAcceptance>
+        <tags>OWIN SimpleOwin WebSockets</tags>
+    </metadata>
+    <files>
+        <file src="..\..\..\LICENSE.txt" target="LICENSE.txt" />
+        <file src="..\..\..\bin\SimpleOwin.Hosts.AspNet\net40\SimpleOwin.Hosts.AspNet.dll" target="lib\net40" />
+        <file src="..\..\..\bin\SimpleOwin.Hosts.AspNet\net40\SimpleOwin.Hosts.AspNet.pdb" target="lib\net40" />
+        <file src="..\..\..\bin\SimpleOwin.Hosts.AspNet\net40\SimpleOwin.Hosts.AspNet.xml" target="lib\net40" />
+        <file src="..\..\..\bin\SimpleOwin.Hosts.AspNet\net45\SimpleOwin.Hosts.AspNet.dll" target="lib\net45" />
+        <file src="..\..\..\bin\SimpleOwin.Hosts.AspNet\net45\SimpleOwin.Hosts.AspNet.pdb" target="lib\net45" />
+        <file src="..\..\..\bin\SimpleOwin.Hosts.AspNet\net45\SimpleOwin.Hosts.AspNet.xml" target="lib\net45" />
+        <file src="..\..\SimpleOwin.Hosts.AspNet\SimpleOwinAspNetHost.cs" target = "src\SimpleOwin.Hosts.AspNet\" />
+        <file src="..\..\SimpleOwin.Hosts.AspNet\Properties\AssemblyInfo.cs" target = "src\SimpleOwin.Hosts.AspNet\Properties\" />
+    </files>
+</package>
