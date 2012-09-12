@@ -1,11 +1,12 @@
 ﻿
 namespace SimpleOwinAspNetHost
 {
+    using System;
+    using System.Web.Routing;
+    using SimpleOwin.Hosts.AspNet;
     using SimpleOwinAspNetHost.Samples;
     using SimpleOwinAspNetHost.Samples.WebSockets.Helloworld;
     using SimpleOwinAspNetHost.Samples.WebSockets.HelloworldAutodetect;
-    using System;
-    using System.Web.Routing;
 
     public class Global : System.Web.HttpApplication
     {

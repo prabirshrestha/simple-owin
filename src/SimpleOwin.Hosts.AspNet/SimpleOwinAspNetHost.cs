@@ -2,7 +2,7 @@
 
 // https://github.com/prabirshrestha/simple-owin
 
-namespace SimpleOwinAspNetHost
+namespace SimpleOwin.Hosts.AspNet
 {
     using System;
     using System.Collections.Generic;

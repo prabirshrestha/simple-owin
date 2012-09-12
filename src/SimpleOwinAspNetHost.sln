@@ -11,6 +11,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SimpleOwin.Middlewares.Rout
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SimpleOwin.Middlewares.AspNetWebSocket", "SimpleOwin.Middlewares.AspNetWebSocket\SimpleOwin.Middlewares.AspNetWebSocket.csproj", "{5D8F7150-E498-4B8C-B835-4FBB8BE76FB3}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SimpleOwin.Hosts.AspNet", "SimpleOwin.Hosts.AspNet\SimpleOwin.Hosts.AspNet.csproj", "{A11786C3-1187-4058-8024-09C391E36D86}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -37,6 +39,10 @@ Global
 		{5D8F7150-E498-4B8C-B835-4FBB8BE76FB3}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5D8F7150-E498-4B8C-B835-4FBB8BE76FB3}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{5D8F7150-E498-4B8C-B835-4FBB8BE76FB3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A11786C3-1187-4058-8024-09C391E36D86}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A11786C3-1187-4058-8024-09C391E36D86}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A11786C3-1187-4058-8024-09C391E36D86}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A11786C3-1187-4058-8024-09C391E36D86}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
