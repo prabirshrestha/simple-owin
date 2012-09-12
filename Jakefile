@@ -1,9 +1,10 @@
-var fs = require('fs'),
-    path = require('path'),
-    njake = require('./src/njake'),
+var 
+    fs      = require('fs'),
+    path    = require('path'),
+    njake   = require('./src/njake'),
     msbuild = njake.msbuild,
-    nuget = njake.nuget,
-    config = {
+    nuget   = njake.nuget,
+    config  = {
         rootPath: __dirname,
         version: fs.readFileSync('VERSION', 'utf-8')
     };
@@ -49,36 +50,44 @@ task('clean', function () {
 
 namespace('nuget', function () {
 
-    task('pack', [
-        'nuget:pack:SimpleOwin.Extensions',
-        'nuget:pack:SimpleOwin.Extensions.Source',
-        'nuget:pack:SimpleOwin.Extensions.SymbolSource',
-        'nuget:pack:SimpleOwin.Hosts.AspNet',
-        'nuget:pack:SimpleOwin.Hosts.AspNet.Source',
-        'nuget:pack:SimpleOwin.Hosts.AspNet.SymbolSource'   
-    ])
-
     namespace('pack', function () {
 
-        directory('dist/symbolsource/')
+        directory('dist/symbolsource/', ['dist/'])
 
-        task('SimpleOwin.Extensions', ['dist/', 'build'], function () {
-            nuget.pack({
-                nuspec: 'src/nuspec/SimpleOwin.Extensions.nuspec',
-                version: config.version,
-                outputDirectory: 'dist/'
+        nugetNuspecs = fs.readdirSync('src/nuspec').filter(function (nuspec) {
+            return nuspec.indexOf('.nuspec') > -1
+        })
+
+        symbolsourceNuspecs = fs.readdirSync('src/nuspec/symbolsource')
+
+        npkgDeps = [
+            'nuget:pack:SimpleOwinExtensions.cs.pp',
+            'nuget:pack:SimpleOwinAspNetHost.cs.pp'
+        ]
+
+        nugetNuspecs.forEach(function (nuspec) {
+            npkgDeps.push('nuget:pack:' + nuspec)
+            task(nuspec, ['dist/', 'build'], function () {
+                nuget.pack({
+                    nuspec: 'src/nuspec/' + nuspec,
+                    version: config.version,
+                    outputDirectory: 'dist/'
+                })
             })
-        }, { async: true })
+        })
 
-        task('SimpleOwin.Extensions.SymbolSource', ['dist/', 'dist/symbolsource/', 'build'], function () {
-            nuget.pack({
-                nuspec: 'src/nuspec/symbolsource/SimpleOwin.Extensions.nuspec',
-                version: config.version,
-                outputDirectory: 'dist/symbolsource/'
+        symbolsourceNuspecs.forEach(function (nuspec) {
+            npkgDeps.push('nuget:pack:symbolsource' + nuspec)
+            task('symbolsource' + nuspec, ['dist/symbolsource/', 'build'], function () {
+                nuget.pack({
+                    nuspec: 'src/nuspec/symbolsource/' + nuspec,
+                    version: config.version,
+                    outputDirectory: 'dist/symbolsource/'
+                })
             })
-        }, { async: true })
+        })
 
-        task('SimpleOwin.Extensions.Source', ['working/', 'dist/', 'build'], function () {
+        task('SimpleOwinExtensions.cs.pp', ['working/', 'dist/', 'build'], function () {
             console.log('Generating working/SimpleOwinExtensions.cs.pp');
 
             var csFile = fs
@@ -86,33 +95,11 @@ namespace('nuget', function () {
                 .replace('// VERSION:', '// VERSION: ' + config.version)
                 .replace('namespace SimpleOwin.Extensions', 'namespace $rootnamespace$')
                 .replace('public static class', 'internal static class');
+
             fs.writeFileSync('working/SimpleOwinExtensions.cs.pp', csFile);
+        })
 
-            nuget.pack({
-                nuspec: 'src/nuspec/SimpleOwin.Extensions.Source.nuspec',
-                version: config.version,
-                outputDirectory: 'dist/'
-            })
-
-        }, { async: true })
-
-        task('SimpleOwin.Hosts.AspNet', ['dist/', 'build'], function () {
-            nuget.pack({
-                nuspec: 'src/nuspec/SimpleOwin.Hosts.AspNet.nuspec',
-                version: config.version,
-                outputDirectory: 'dist/'
-            })
-        }, { async: true })
-
-        task('SimpleOwin.Hosts.AspNet.SymbolSource', ['dist/', 'dist/symbolsource/', 'build'], function () {
-            nuget.pack({
-                nuspec: 'src/nuspec/symbolsource/SimpleOwin.Hosts.AspNet.nuspec',
-                version: config.version,
-                outputDirectory: 'dist/symbolsource/'
-            })
-        }, { async: true })
-
-        task('SimpleOwin.Hosts.AspNet.Source', ['working/', 'dist/', 'build'], function () {
+        task('SimpleOwinAspNetHost.cs.pp', ['working/', 'dist/', 'build'], function () {
             console.log('Generating working/SimpleOwinAspNetHost.cs');
 
             var csFile = fs
@@ -121,15 +108,11 @@ namespace('nuget', function () {
                 .replace('namespace SimpleOwin.Hosts.AspNet', 'namespace $rootnamespace$')
                 .replace(/public class/g, 'internal class');
             fs.writeFileSync('working/SimpleOwinAspNetHost.cs.pp', csFile);
-
-            nuget.pack({
-                nuspec: 'src/nuspec/SimpleOwin.Hosts.AspNet.Source.nuspec',
-                version: config.version,
-                outputDirectory: 'dist/'
-            })
-
-        }, { async: true })
+        })
 
     })
+
+    desc('Create nuget packages')
+    task('pack', npkgDeps)
 
 })
