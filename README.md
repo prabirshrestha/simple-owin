@@ -7,7 +7,7 @@ Includes the following samples
 * Hello world OWIN app
 * OWIN app using multiple middlewares with AppFunc chaining
 
-Web socket samples (requires full IIS8 on Windows8 with `#define ASPNET_WEBSOCKETS`)
+Web socket samples (requires IIS8+/IIS8Express+ on Windows 8+ with `#define ASPNET_WEBSOCKETS`)
 
 * Hello world OWIN WebSocket extension sample
 
