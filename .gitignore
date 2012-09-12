@@ -65,3 +65,5 @@ node_modules/
 # Misc Ignores
 Thumbs.db
 !libs/*/[Bb]in/
+
+dist/

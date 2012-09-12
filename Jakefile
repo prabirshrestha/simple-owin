@@ -23,6 +23,8 @@ nuget.setDefaults({
 
 task('default', ['build'])
 
+directory('dist/')
+
 desc('Build')
 task('build', function () {
 	msbuild({
@@ -39,6 +41,25 @@ task('clean', function () {
 	}, function(code) {
 		if (code !== 0) fail('msbuild failed')
 		jake.rmRf('bin/')
+		jake.rmRf('dist/')
 	})
 }, { async: true })
+
+namespace('nuget', function () {
+
+	task('pack', ['nuget:pack:SimpleOwin.Extensions'])
+
+    namespace('pack', function () {
+
+        task('SimpleOwin.Extensions', ['dist', 'build'], function () {
+            nuget.pack({
+                nuspec: 'src/nuspec/SimpleOwin.Extensions.nuspec',
+                version: config.version,
+                outputDirectory: 'dist/'
+            })
+        }, { async: true })
+
+	})
+
+})
 
