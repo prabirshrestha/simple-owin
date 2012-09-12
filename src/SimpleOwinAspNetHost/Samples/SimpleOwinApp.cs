@@ -2,8 +2,8 @@
 {
     using System;
     using System.Collections.Generic;
-    using System.Text;
     using SimpleOwin.Extensions;
+    using SimpleOwin.Extensions.Stream;
     using SimpleOwin.Middlewares;
     using SimpleOwin.Middlewares.Router;
 
@@ -37,19 +37,15 @@
             router.Get("hello", next =>
                             async env =>
                             {
-                                var msg = Encoding.UTF8.GetBytes("hello");
-                                var responseBody = env.GetOwinResponseBody();
-
-                                await responseBody.WriteAsync(msg, 0, msg.Length);
+                                await env.GetOwinResponseBody()
+                                    .WriteStringAsync("hello");
                             });
 
             router.Get("*", next =>
                             async env =>
                             {
-                                var msg = Encoding.UTF8.GetBytes("hi from get *");
-                                var responseBody = env.GetOwinResponseBody();
-
-                                await responseBody.WriteAsync(msg, 0, msg.Length);
+                                await env.GetOwinResponseBody()
+                                    .WriteStringAsync("hi from get *");
                             });
 
             router.All("*", NotFound.Middleware());

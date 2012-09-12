@@ -6,7 +6,7 @@ namespace SimpleOwin.Extensions
 {
     using System;
     using System.Collections.Generic;
-    using System.IO;
+    using System.Text;
     using System.Threading;
     using System.Threading.Tasks;
 
@@ -99,9 +99,9 @@ namespace SimpleOwin.Extensions
             return env.GetOwinEnvironmentValue<string>("owin.RequestQueryString");
         }
 
-        public static Stream GetOwinRequestBody(this Env env)
+        public static System.IO.Stream GetOwinRequestBody(this Env env)
         {
-            return env.GetOwinEnvironmentValue<Stream>("owin.RequestBody");
+            return env.GetOwinEnvironmentValue<System.IO.Stream>("owin.RequestBody");
         }
 
         public static string GetOwinCallCancelled(this Env env)
@@ -124,9 +124,9 @@ namespace SimpleOwin.Extensions
             return env.GetOwinEnvironmentValue<IDictionary<string, string[]>>("owin.ResponseHeaders");
         }
 
-        public static Stream GetOwinResponseBody(this Env env)
+        public static System.IO.Stream GetOwinResponseBody(this Env env)
         {
-            return env.GetOwinEnvironmentValue<Stream>("owin.ResponseBody");
+            return env.GetOwinEnvironmentValue<System.IO.Stream>("owin.ResponseBody");
         }
 
         public static string[] GetOwinHeaderValues(this IDictionary<string, string[]> headers, string name, string[] defaultValue = null)
@@ -178,7 +178,7 @@ namespace SimpleOwin.Extensions
             return env.SetOwinEnvironmentValue("owin.RequestQueryString", queryString);
         }
 
-        public static Env SetOwinRequestBody(this Env env, Stream stream)
+        public static Env SetOwinRequestBody(this Env env, System.IO.Stream stream)
         {
             return env.SetOwinEnvironmentValue("owin.RequestBody", stream);
         }
@@ -287,6 +287,39 @@ namespace SimpleOwin.Extensions
                     return next(env);
                 };
         }
+    }
 
+    namespace Stream
+    {
+        public static class StreamExtensions
+        {
+            public static void WriteString(this System.IO.Stream stream, string str, Encoding encoding)
+            {
+                var data = encoding.GetBytes(str);
+                stream.Write(data, 0, data.Length);
+            }
+
+            public static void WriteString(this System.IO.Stream stream, string str)
+            {
+                stream.WriteString(str, Encoding.UTF8);
+            }
+
+            public static Task WriteStringAsync(this System.IO.Stream stream, string str, Encoding encoding)
+            {
+                var data = encoding.GetBytes(str);
+                return stream.WriteAsync(data, 0, data.Length, null);
+            }
+
+            public static Task WriteStringAsync(this System.IO.Stream stream, string str)
+            {
+                var data = Encoding.UTF8.GetBytes(str);
+                return stream.WriteAsync(data, 0, data.Length, null);
+            }
+
+            private static Task WriteAsync(this  System.IO.Stream stream, byte[] data, int offset, int count, object state)
+            {
+                return Task.Factory.FromAsync(stream.BeginWrite, stream.EndWrite, data, offset, count, state);
+            }
+        }
     }
 }
