@@ -8,6 +8,17 @@ namespace SimpleOwin.Middlewares.Router
 
     using AppFunc = System.Func<System.Collections.Generic.IDictionary<string, object>, System.Threading.Tasks.Task>;
 
+    namespace Extensions
+    {
+        public static class RegexRouterExtensions
+        {
+            public static IDictionary<string, string> GetSimpleOwinRouteParameters(this IDictionary<string, object> env)
+            {
+                return env.GetOwinEnvironmentValue<IDictionary<string, string>>("SimpleOwin.Route.Parameters");
+            }
+        }
+    }
+
     public class RegexRouter
     {
         private readonly bool ignoreCase;
@@ -140,6 +151,11 @@ namespace SimpleOwin.Middlewares.Router
                                var match = regex.Match(path);
                                if (!match.Success)
                                    continue;
+
+                               var matched = new Dictionary<string, string>();
+                               for (int i = 0; i < match.Groups.Count; i++)
+                                   matched[regex.GroupNameFromNumber(i)] = match.Groups[i].Value;
+                               env["SimpleOwin.Route.Parameters"] = matched;
                            }
 
                            return callback(next)(env);

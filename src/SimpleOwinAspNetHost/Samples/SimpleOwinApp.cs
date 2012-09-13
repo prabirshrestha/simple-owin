@@ -6,6 +6,7 @@
     using SimpleOwin.Extensions.Stream;
     using SimpleOwin.Middlewares;
     using SimpleOwin.Middlewares.Router;
+    using SimpleOwin.Middlewares.Router.Extensions;
 
     using AppFunc = System.Func<System.Collections.Generic.IDictionary<string, object>, System.Threading.Tasks.Task>;
 
@@ -30,6 +31,15 @@
                                await env.GetOwinResponseBody()
                                    .WriteStringAsync("hi");
                            });
+
+            router.Get(@"/hi/(?<name>((.)*))$", next =>
+                            async env =>
+                            {
+                                var routeParameters = env.GetSimpleOwinRouteParameters();
+
+                                await env.GetOwinResponseBody()
+                                    .WriteStringAsync("Hi " + routeParameters["name"]);
+                            });
 
             router.Get("/hello", next =>
                                 async env =>
