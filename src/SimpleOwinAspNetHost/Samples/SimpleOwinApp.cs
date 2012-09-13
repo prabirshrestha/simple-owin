@@ -13,40 +13,30 @@
     {
         public static AppFunc OwinApp()
         {
-            var app = new List<Func<AppFunc, AppFunc>>();
+            var app =
+                new List<Func<AppFunc, AppFunc>>()
+                    .Use(H5bp.IeEdgeChromeFrameHeader())
+                    .Use(H5bp.RemovePoweredBy())
+                    .Use(H5bp.CrossDomainRules())
+                    .Use(JsonBodyParser.Middleware())
+                    .Use(UrlEncoded.Middleware())
+                    .Use(MethodOverride.Middleware());
 
-            app
-                .Use(H5bp.IeEdgeChromeFrameHeader())
-                .Use(H5bp.RemovePoweredBy())
-                .Use(H5bp.CrossDomainRules());
+            var router = new RegexRouter(app);
 
-            // Instead of Use extension method you can use Add.
-            // Add is a available in .NET via ICollection<T> but it does not allow chaining.
+            router.Get("/", next =>
+                           async env =>
+                           {
+                               await env.GetOwinResponseBody()
+                                   .WriteStringAsync("hi");
+                           });
 
-            app.Add(QueryParser.Middleware());
-
-            // and you can mix both Use and Add
-            app
-                .Use(JsonBodyParser.Middleware())
-                .Use(UrlEncoded.Middleware())
-                .Use(MethodOverride.Middleware());
-
-            IRouter router = new RegexRouter(app); // this will auto call app.Add(router.Middleware());
-            // you can manually add it later on if you pass nothing in Router constructor are pass it as null
-
-            router.Get("hello", next =>
-                            async env =>
-                            {
-                                await env.GetOwinResponseBody()
-                                    .WriteStringAsync("hello");
-                            });
-
-            router.Get("*", next =>
-                            async env =>
-                            {
-                                await env.GetOwinResponseBody()
-                                    .WriteStringAsync("hi from get *");
-                            });
+            router.Get("/hello", next =>
+                                async env =>
+                                {
+                                    await env.GetOwinResponseBody()
+                                        .WriteStringAsync("hello");
+                                });
 
             router.All("*", NotFound.Middleware());
 

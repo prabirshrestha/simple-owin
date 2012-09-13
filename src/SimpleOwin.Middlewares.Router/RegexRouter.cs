@@ -8,102 +8,110 @@ namespace SimpleOwin.Middlewares.Router
 
     using AppFunc = System.Func<System.Collections.Generic.IDictionary<string, object>, System.Threading.Tasks.Task>;
 
-    public class RegexRouter : IRouter
+    public class RegexRouter
     {
-        private readonly bool _ignoreCase;
+        private readonly bool ignoreCase;
+
         // method, route, regex, callback
-        private readonly ICollection<Tuple<string, string, Regex, Func<AppFunc, AppFunc>>> _routes;
+        private readonly ICollection<Tuple<string, string, Regex, Func<AppFunc, AppFunc>>> routes;
 
-        private readonly RegexOptions _defaultRegexOptions;
+        private readonly RegexOptions defaultRegexOptions;
 
-        public bool IgnoreCase { get { return _ignoreCase; } }
+        public bool IgnoreCase { get { return this.ignoreCase; } }
 
-        public RegexRouter(ICollection<Func<AppFunc, AppFunc>> app = null, bool ignoreCase = true)
+        public RegexRouter(ICollection<Func<AppFunc, AppFunc>> app = null, bool ignoreCase = true, Action<RegexRouter> config = null)
         {
-            _ignoreCase = ignoreCase;
-            _defaultRegexOptions = RegexOptions.CultureInvariant | RegexOptions.Compiled;
+            this.ignoreCase = ignoreCase;
+            this.defaultRegexOptions = RegexOptions.CultureInvariant | RegexOptions.Compiled;
 
-            _routes = new List<Tuple<string, string, Regex, Func<AppFunc, AppFunc>>>();
+            this.routes = new List<Tuple<string, string, Regex, Func<AppFunc, AppFunc>>>();
 
             if (ignoreCase)
-                _defaultRegexOptions |= RegexOptions.IgnoreCase;
+                this.defaultRegexOptions |= RegexOptions.IgnoreCase;
 
             if (app != null)
                 app.Add(Middleware());
+
+            if (config != null)
+                config(this);
         }
 
         private Regex CreateRegex(string route)
         {
-            if (string.IsNullOrWhiteSpace(route))
-                throw new ArgumentNullException("route");
-
-            if (route == "*")
+            if (route.StartsWith("/"))
+                route = route.Substring(1);
+            if (string.IsNullOrEmpty(route))
+                route = @"^[\s]*[\s]*$";
+            else if (route == "*")
                 route = "(.)*";
 
-            return new Regex(route, _defaultRegexOptions);
+            return new Regex(route, this.defaultRegexOptions);
         }
 
-        public void All(Func<AppFunc, AppFunc> callback)
+        public RegexRouter All(Func<AppFunc, AppFunc> callback)
         {
             if (callback == null)
                 throw new ArgumentNullException("callback");
 
-            _routes.Add(new Tuple<string, string, Regex, Func<AppFunc, AppFunc>>(null, null, null, callback));
+            this.routes.Add(new Tuple<string, string, Regex, Func<AppFunc, AppFunc>>(null, null, null, callback));
+            return this;
         }
 
-        public void All(string route, Func<AppFunc, AppFunc> callback)
-        {
-            if (callback == null)
-                throw new ArgumentNullException("callback");
-
-            var regex = CreateRegex(route);
-
-            _routes.Add(new Tuple<string, string, Regex, Func<AppFunc, AppFunc>>(null, route, regex, callback));
-        }
-
-        private void Method(string methodName, string route, Func<AppFunc, AppFunc> callback)
+        public RegexRouter All(string route, Func<AppFunc, AppFunc> callback)
         {
             if (callback == null)
                 throw new ArgumentNullException("callback");
 
             var regex = CreateRegex(route);
 
-            _routes.Add(new Tuple<string, string, Regex, Func<AppFunc, AppFunc>>(methodName, route, regex, callback));
+            this.routes.Add(new Tuple<string, string, Regex, Func<AppFunc, AppFunc>>(null, route, regex, callback));
+            return this;
         }
 
-        public void Get(string route, Func<AppFunc, AppFunc> callback)
+        private RegexRouter Method(string methodName, string route, Func<AppFunc, AppFunc> callback)
         {
-            Method("GET", route, callback);
+            if (callback == null)
+                throw new ArgumentNullException("callback");
+
+            var regex = CreateRegex(route);
+
+            this.routes.Add(new Tuple<string, string, Regex, Func<AppFunc, AppFunc>>(methodName, route, regex, callback));
+            return this;
         }
 
-        public void Post(string route, Func<AppFunc, AppFunc> callback)
+        public RegexRouter Get(string route, Func<AppFunc, AppFunc> callback)
         {
-            Method("POST", route, callback);
+            return Method("GET", route, callback);
         }
 
-        public void Put(string route, Func<AppFunc, AppFunc> callback)
+        public RegexRouter Post(string route, Func<AppFunc, AppFunc> callback)
         {
-            Method("POST", route, callback);
+            return Method("POST", route, callback);
         }
 
-        public void Delete(string route, Func<AppFunc, AppFunc> callback)
+        public RegexRouter Put(string route, Func<AppFunc, AppFunc> callback)
         {
-            Method("DELETE", route, callback);
+            return Method("POST", route, callback);
         }
 
-        public void Head(string route, Func<AppFunc, AppFunc> callback)
+        public RegexRouter Delete(string route, Func<AppFunc, AppFunc> callback)
         {
-            Method("HEAD", route, callback);
+            return Method("DELETE", route, callback);
         }
 
-        public void Options(string route, Func<AppFunc, AppFunc> callback)
+        public RegexRouter Head(string route, Func<AppFunc, AppFunc> callback)
         {
-            Method("Options", route, callback);
+            return Method("HEAD", route, callback);
         }
 
-        public void Patch(string route, Func<AppFunc, AppFunc> callback)
+        public RegexRouter Options(string route, Func<AppFunc, AppFunc> callback)
         {
-            Method("PATCH", route, callback);
+            return Method("Options", route, callback);
+        }
+
+        public RegexRouter Patch(string route, Func<AppFunc, AppFunc> callback)
+        {
+            return Method("PATCH", route, callback);
         }
 
         public Func<AppFunc, AppFunc> Middleware()
@@ -114,7 +122,7 @@ namespace SimpleOwin.Middlewares.Router
                        var method = env.GetOwinRequestMethod();
                        var path = env.GetOwinRequestPath();
 
-                       foreach (var routeToExectue in _routes)
+                       foreach (var routeToExectue in this.routes)
                        {
                            var routeMethod = routeToExectue.Item1;
                            //var route = routeToExectue.Item2;
