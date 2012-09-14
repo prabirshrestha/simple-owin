@@ -2,6 +2,7 @@
 {
     using System;
     using System.Collections.Generic;
+    using System.Dynamic;
     using SimpleOwin.Extensions;
     using SimpleOwin.Extensions.Stream;
     using SimpleOwin.Middlewares;
@@ -12,7 +13,7 @@
 
     public class SimpleOwinApp
     {
-        public static AppFunc OwinApp()
+        public static AppFunc OwinApp(IDictionary<string, object> startupEnv = null)
         {
             var app =
                 new List<Func<AppFunc, AppFunc>>()
@@ -24,6 +25,7 @@
                     .Use(MethodOverride.Middleware());
 
             var router = new RegexRouter(app);
+            var template = new RazorEngine.Templating.TemplateService();
 
             router.Get("/", next =>
                            async env =>
@@ -32,25 +34,30 @@
                                    .WriteStringAsync("hi");
                            });
 
+            template.Compile("Hi @Model.name", typeof(DynamicObject), "/hi");
             router.Get(@"/hi/(?<name>((.)*))$", next =>
                             async env =>
                             {
                                 var routeParameters = env.GetSimpleOwinRouteParameters();
 
+                                string html = template.Run("/hi", new { name = routeParameters["name"] }.ToDynamicObject());
+
                                 await env.GetOwinResponseBody()
-                                    .WriteStringAsync("Hi " + routeParameters["name"]);
+                                    .WriteStringAsync(html);
                             });
 
             router.Get("/hello", next =>
                                 async env =>
                                 {
                                     await env.GetOwinResponseBody()
-                                        .WriteStringAsync("hello");
+                                        .WriteStringAsync("Hello");
                                 });
 
             router.All("*", NotFound.Middleware());
 
             return app.ToOwinApp();
         }
+
+
     }
 }
