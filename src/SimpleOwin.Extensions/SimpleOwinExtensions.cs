@@ -288,6 +288,11 @@ namespace SimpleOwin.Extensions
                 };
         }
         
+        public static AppFunc ToOwinApp(this Func<AppFunc, AppFunc> app)
+        {
+            return env => app(env2 => NoopTask)(env);
+        }
+        
         public static Func<AppFunc, AppFunc> ToOwinMiddleware(this IEnumerable<Func<AppFunc, AppFunc>> app)
         {
             return next => env => app.ToOwinApp()(env);
