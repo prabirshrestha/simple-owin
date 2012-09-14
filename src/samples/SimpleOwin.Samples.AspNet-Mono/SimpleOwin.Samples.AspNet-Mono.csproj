@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>10.0.0</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{14EAAA75-DDE1-4D04-8B07-3012552951A4}</ProjectGuid>
+    <ProjectTypeGuids>{349C5851-65DF-11DA-9384-00065B846F21};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
+    <OutputType>Library</OutputType>
+    <RootNamespace>SimpleOwin.Samples.AspNetMono</RootNamespace>
+    <AssemblyName>SimpleOwin.Samples.AspNet-Mono</AssemblyName>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>True</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>False</Optimize>
+    <OutputPath>bin</OutputPath>
+    <DefineConstants>DEBUG;</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <ConsolePause>False</ConsolePause>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>none</DebugType>
+    <Optimize>True</Optimize>
+    <OutputPath>bin</OutputPath>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <ConsolePause>False</ConsolePause>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Web" />
+    <Reference Include="System.Xml" />
+    <Reference Include="System.Web.Services" />
+  </ItemGroup>
+  <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
+  <Import Project="$(MSBuildExtensionsPath)\Microsoft\VisualStudio\v10.0\WebApplications\Microsoft.WebApplication.targets" />
+  <ProjectExtensions>
+    <MonoDevelop>
+      <Properties VerifyCodeBehindFields="True" VerifyCodeBehindEvents="True">
+        <XspParameters Port="8080" Address="127.0.0.1" SslMode="None" SslProtocol="Default" KeyType="None" CertFile="" KeyFile="" PasswordOptions="None" Password="" Verbose="True" />
+      </Properties>
+    </MonoDevelop>
+  </ProjectExtensions>
+  <ItemGroup>
+    <Content Include="Global.asax" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Global.asax.cs">
+      <DependentUpon>Global.asax</DependentUpon>
+    </Compile>
+    <Compile Include="HelloWorldOwinApp.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\SimpleOwin.Extensions\SimpleOwin.Extensions-Mono.csproj">
+      <Project>{2F690547-7149-4C5D-AADF-98811575AA35}</Project>
+      <Name>SimpleOwin.Extensions-Mono</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\SimpleOwin.Hosts.AspNet\SimpleOwin.Hosts.AspNet-Mono.csproj">
+      <Project>{291B84FB-AD1E-4348-965A-1605F06558A7}</Project>
+      <Name>SimpleOwin.Hosts.AspNet-Mono</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\SimpleOwin.Middlewares.Router\SimpleOwin.Middlewares.Router-Mono.csproj">
+      <Project>{E3B161E8-3F53-453A-9D87-EB25B3927363}</Project>
+      <Name>SimpleOwin.Middlewares.Router-Mono</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\SimpleOwin.Middlewares\SimpleOwin.Middlewares-Mono.csproj">
+      <Project>{E20EBBDB-A96E-4F1B-9324-B474FFA570DB}</Project>
+      <Name>SimpleOwin.Middlewares-Mono</Name>
+    </ProjectReference>
+  </ItemGroup>
+</Project>

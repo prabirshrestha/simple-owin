@@ -9,12 +9,18 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SimpleOwin.Middlewares-Mono
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SimpleOwin.Middlewares.Router-Mono", "SimpleOwin.Middlewares.Router\SimpleOwin.Middlewares.Router-Mono.csproj", "{E3B161E8-3F53-453A-9D87-EB25B3927363}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SimpleOwin.Samples.AspNet-Mono", "samples\SimpleOwin.Samples.AspNet-Mono\SimpleOwin.Samples.AspNet-Mono.csproj", "{14EAAA75-DDE1-4D04-8B07-3012552951A4}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{14EAAA75-DDE1-4D04-8B07-3012552951A4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{14EAAA75-DDE1-4D04-8B07-3012552951A4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{14EAAA75-DDE1-4D04-8B07-3012552951A4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{14EAAA75-DDE1-4D04-8B07-3012552951A4}.Release|Any CPU.Build.0 = Release|Any CPU
 		{291B84FB-AD1E-4348-965A-1605F06558A7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{291B84FB-AD1E-4348-965A-1605F06558A7}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{291B84FB-AD1E-4348-965A-1605F06558A7}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -33,6 +39,6 @@ Global
 		{E3B161E8-3F53-453A-9D87-EB25B3927363}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(MonoDevelopProperties) = preSolution
-		StartupItem = SimpleOwin.Extensions\SimpleOwin.Extensions-Mono.csproj
+		StartupItem = samples\SimpleOwin.Samples.AspNet-Mono\SimpleOwin.Samples.AspNet-Mono.csproj
 	EndGlobalSection
 EndGlobal
