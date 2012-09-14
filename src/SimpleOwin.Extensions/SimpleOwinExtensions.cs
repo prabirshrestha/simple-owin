@@ -287,6 +287,12 @@ namespace SimpleOwin.Extensions
                     return next(env);
                 };
         }
+        
+        public static Func<AppFunc, AppFunc> ToOwinMiddleware(this IEnumerable<Func<AppFunc, AppFunc>> app)
+        {
+            return next => env => app.ToOwinApp()(env);
+        }
+
     }
 
     namespace Stream
