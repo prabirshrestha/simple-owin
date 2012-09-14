@@ -26,7 +26,8 @@ UpgradeLog*.XML
 # Windows Azure
 csx/
 
-*.userprefs # Mono develop
+# Mono develop
+*.userprefs
 
 # Visual Studio Extensions Ignores
 .vs10x
