@@ -107,10 +107,6 @@
       <Project>{5D8F7150-E498-4B8C-B835-4FBB8BE76FB3}</Project>
       <Name>SimpleOwin.Middlewares.AspNetWebSocket</Name>
     </ProjectReference>
-    <ProjectReference Include="..\SimpleOwin.Middlewares.Router\SimpleOwin.Middlewares.Router.csproj">
-      <Project>{E3B161E8-3F53-453A-9D87-EB25B3927363}</Project>
-      <Name>SimpleOwin.Middlewares.Router</Name>
-    </ProjectReference>
     <ProjectReference Include="..\SimpleOwin.Middlewares\SimpleOwin.Middlewares.csproj">
       <Project>{e20ebbdb-a96e-4f1b-9324-b474ffa570db}</Project>
       <Name>SimpleOwin.Middlewares</Name>

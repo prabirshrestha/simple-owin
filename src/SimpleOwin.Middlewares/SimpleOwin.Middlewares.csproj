@@ -45,6 +45,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="RegexRouter.cs" />
     <Compile Include="UrlEncoded.cs" />
     <Compile Include="H5bp.cs" />
     <Compile Include="IRouter.cs" />

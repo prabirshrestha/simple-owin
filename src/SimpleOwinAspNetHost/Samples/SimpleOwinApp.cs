@@ -6,8 +6,7 @@
     using SimpleOwin.Extensions;
     using SimpleOwin.Extensions.Stream;
     using SimpleOwin.Middlewares;
-    using SimpleOwin.Middlewares.Router;
-    using SimpleOwin.Middlewares.Router.Extensions;
+    using SimpleOwin.Middlewares.Extensions;
 
     using AppFunc = System.Func<System.Collections.Generic.IDictionary<string, object>, System.Threading.Tasks.Task>;
 

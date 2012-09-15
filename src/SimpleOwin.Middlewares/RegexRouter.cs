@@ -1,5 +1,5 @@
 ﻿
-namespace SimpleOwin.Middlewares.Router
+namespace SimpleOwin.Middlewares
 {
     using System;
     using System.Collections.Generic;
