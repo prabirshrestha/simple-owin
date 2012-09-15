@@ -49,14 +49,12 @@ namespace SimpleOwin.Middlewares
 
         private Regex CreateRegex(string route)
         {
-            if (route.StartsWith("/"))
-                route = route.Substring(1);
-            if (string.IsNullOrEmpty(route))
-                route = @"^[\s]*[\s]*$";
-            else if (route == "*")
-                route = "(.)*";
-
-            return new Regex(route, this.defaultRegexOptions);
+			if (string.IsNullOrEmpty(route))
+				throw new ArgumentNullException("route");
+			else if (route == "*")
+				route = "(.)*";
+			
+			return new Regex(route, this.defaultRegexOptions);
         }
 
         public RegexRouter All(Func<AppFunc, AppFunc> callback)
