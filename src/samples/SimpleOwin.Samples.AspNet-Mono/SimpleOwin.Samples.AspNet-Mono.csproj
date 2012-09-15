@@ -62,10 +62,6 @@
       <Project>{291B84FB-AD1E-4348-965A-1605F06558A7}</Project>
       <Name>SimpleOwin.Hosts.AspNet-Mono</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\SimpleOwin.Middlewares.Router\SimpleOwin.Middlewares.Router-Mono.csproj">
-      <Project>{E3B161E8-3F53-453A-9D87-EB25B3927363}</Project>
-      <Name>SimpleOwin.Middlewares.Router-Mono</Name>
-    </ProjectReference>
     <ProjectReference Include="..\..\SimpleOwin.Middlewares\SimpleOwin.Middlewares-Mono.csproj">
       <Project>{E20EBBDB-A96E-4F1B-9324-B474FFA570DB}</Project>
       <Name>SimpleOwin.Middlewares-Mono</Name>
