@@ -8,7 +8,7 @@
         <owners>Prabir Shrestha</owners>
         <description>Extension methods for OWIN.</description>
         <language>en-US</language>
-        <licenseUrl>https://github.com/prabirshrestha/simple-owin/LICENSE.txt</licenseUrl>
+        <licenseUrl>https://github.com/prabirshrestha/simple-owin/blob/master/LICENSE.txt</licenseUrl>
         <projectUrl>https://github.com/prabirshrestha/simple-owin</projectUrl>
         <requireLicenseAcceptance>false</requireLicenseAcceptance>
         <tags>OWIN SimpleOwin</tags>
