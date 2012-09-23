@@ -205,7 +205,7 @@ namespace SimpleOwin.Hosts.AspNet
                 .Select(key => new KeyValuePair<string, object>(key, request.ServerVariables.Get(key)));
 
             var env = new Dictionary<string, object>();
-            env[OwinConstants.VersionKey] = "1.0";
+            env[OwinConstants.VersionKey] = OwinConstants.Version;
             env[OwinConstants.RequestMethodKey] = request.HttpMethod;
             env[OwinConstants.RequestSchemeKey] = request.Url.Scheme;
             env[OwinConstants.RequestPathBaseKey] = pathBase;
@@ -365,7 +365,7 @@ namespace SimpleOwin.Hosts.AspNet
         public static IDictionary<string, object> GetStartupProperties()
         {
             var properties = new Dictionary<string, object>(StringComparer.OrdinalIgnoreCase);
-            properties[OwinConstants.VersionKey] = "1.0";
+            properties[OwinConstants.VersionKey] = OwinConstants.Version;
 #if ASPNET_WEBSOCKETS
             if (Environment.OSVersion.Platform == PlatformID.Win32NT && Environment.OSVersion.Version >= new Version(6, 2) || HttpRuntime.IISVersion != null && HttpRuntime.IISVersion.Major >= 8)
             {
@@ -591,6 +591,7 @@ namespace SimpleOwin.Hosts.AspNet
 
         private static class OwinConstants
         {
+            public const string Version = "1.0";
             public const string VersionKey = "owin.Version";
             public const string RequestMethodKey = "owin.RequestMethod";
             public const string RequestSchemeKey = "owin.RequestScheme";
