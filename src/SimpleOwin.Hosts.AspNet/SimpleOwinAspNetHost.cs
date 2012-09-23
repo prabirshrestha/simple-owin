@@ -95,12 +95,19 @@ namespace SimpleOwin.Hosts.AspNet
         private readonly string root;
 
         private static readonly Task CompletedTask;
+        private static readonly bool SupportsWebSockets;
 
         static SimpleOwinAspNetHandler()
         {
             var tcs = new TaskCompletionSource<int>();
             tcs.TrySetResult(0);
             CompletedTask = tcs.Task;
+
+            var startup = GetStartupProperties();
+            if (startup.ContainsKey(OwinConstants.WebSocketVersionKey) && startup.ContainsKey(OwinConstants.WebSocketSupportKey))
+            {
+                SupportsWebSockets = true;
+            }
         }
 
         public SimpleOwinAspNetHandler(AppFunc app)
@@ -269,51 +276,51 @@ namespace SimpleOwin.Hosts.AspNet
                         else
                         {
 #if ASPNET_WEBSOCKETS
-                                              object tempWsBodyDelegate;
+                            object tempWsBodyDelegate;
 
-                                              if (responseStatusCode == null)
-                                              {
-                                                  responseStatusCode = Get<int>(env, OwinConstants.ResponseStatusCodeKey, 200);                                                  
-                                              }
+                            if (responseStatusCode == null)
+                            {
+                                responseStatusCode = Get<int>(env, OwinConstants.ResponseStatusCodeKey, 200);
+                            }
 
-                                              if (responseStatusCode.Value == 101 &&
-                                                  env.TryGetValue(OwinConstants.WebSocketFuncKey, out tempWsBodyDelegate) &&
-                                                  tempWsBodyDelegate != null)
-                                              {
-                                                  var wsBodyDelegate = (WebSocketFunc)tempWsBodyDelegate;
-                                                  context.AcceptWebSocketRequest(async websocketContext => // todo: AcceptWebSocketRequest throws error
-                                                  {
-                                                      var webSocket = websocketContext.WebSocket;
+                            if (responseStatusCode.Value == 101 &&
+                                env.TryGetValue(OwinConstants.WebSocketFuncKey, out tempWsBodyDelegate) &&
+                                tempWsBodyDelegate != null)
+                            {
+                                var wsBodyDelegate = (WebSocketFunc)tempWsBodyDelegate;
+                                context.AcceptWebSocketRequest(async websocketContext => // todo: AcceptWebSocketRequest throws error
+                                {
+                                    var webSocket = websocketContext.WebSocket;
 
-                                                      var wsEnv = new Dictionary<string, object>(StringComparer.OrdinalIgnoreCase);
-                                                      wsEnv[OwinConstants.WebSocketSendAsyncFuncKey] = WebSocketSendAsync(webSocket);
-                                                      wsEnv[OwinConstants.WebSocketReceiveAsyncFuncKey] = WebSocketReceiveAsync(webSocket);
-                                                      wsEnv[OwinConstants.WebSocketCloseAsyncFuncKey] = WebSocketCloseAsync(webSocket);
-                                                      wsEnv[OwinConstants.WebSocketVersionKey] = "1.0";
-                                                      wsEnv[OwinConstants.WebSocketCallCancelledKey] = CancellationToken.None;
-                                                      wsEnv[OwinConstants.AspNetWebSocketContextKey] = websocketContext;
+                                    var wsEnv = new Dictionary<string, object>(StringComparer.OrdinalIgnoreCase);
+                                    wsEnv[OwinConstants.WebSocketSendAsyncFuncKey] = WebSocketSendAsync(webSocket);
+                                    wsEnv[OwinConstants.WebSocketReceiveAsyncFuncKey] = WebSocketReceiveAsync(webSocket);
+                                    wsEnv[OwinConstants.WebSocketCloseAsyncFuncKey] = WebSocketCloseAsync(webSocket);
+                                    wsEnv[OwinConstants.WebSocketVersionKey] = "1.0";
+                                    wsEnv[OwinConstants.WebSocketCallCancelledKey] = CancellationToken.None;
+                                    wsEnv[OwinConstants.AspNetWebSocketContextKey] = websocketContext;
 
-                                                      await wsBodyDelegate(wsEnv);
+                                    await wsBodyDelegate(wsEnv);
 
-                                                      switch (webSocket.State)
-                                                      {
-                                                          case WebSocketState.Closed:  // closed gracefully, no action needed
-                                                          case WebSocketState.Aborted: // closed abortively, no action needed
-                                                              break;
-                                                          case WebSocketState.CloseReceived:
-                                                              await webSocket.CloseAsync(WebSocketCloseStatus.NormalClosure, string.Empty, CancellationToken.None);
-                                                              break;
-                                                          case WebSocketState.Open:
-                                                          case WebSocketState.CloseSent: // No close received, abort so we don't have to drain the pipe.
-                                                              websocketContext.WebSocket.Abort();
-                                                              break;
-                                                          default:
-                                                              throw new ArgumentOutOfRangeException("state", webSocket.State, string.Empty);
-                                                      }
+                                    switch (webSocket.State)
+                                    {
+                                        case WebSocketState.Closed:  // closed gracefully, no action needed
+                                        case WebSocketState.Aborted: // closed abortively, no action needed
+                                            break;
+                                        case WebSocketState.CloseReceived:
+                                            await webSocket.CloseAsync(WebSocketCloseStatus.NormalClosure, string.Empty, CancellationToken.None);
+                                            break;
+                                        case WebSocketState.Open:
+                                        case WebSocketState.CloseSent: // No close received, abort so we don't have to drain the pipe.
+                                            websocketContext.WebSocket.Abort();
+                                            break;
+                                        default:
+                                            throw new ArgumentOutOfRangeException("state", webSocket.State, string.Empty);
+                                    }
 
-                                                      response.Close();
-                                                  });
-                                              }
+                                    response.Close();
+                                });
+                            }
 #endif
                             tcs.TrySetResult(() => { });
                         }
