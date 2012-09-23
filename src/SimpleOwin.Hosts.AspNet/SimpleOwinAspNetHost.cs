@@ -253,7 +253,7 @@ namespace SimpleOwin.Hosts.AspNet
 #if ASPNET_WEBSOCKETS
             if (context.IsWebSocketRequest)
             {
-                env[OwinConstants.WebSocketVersionKey] = "1.0";
+                env[OwinConstants.WebSocketVersionKey] = OwinConstants.WebSocketVersion;
                 env[OwinConstants.WebSocketSupportKey] = "WebSocketFunc";
             }
 #endif
@@ -296,7 +296,7 @@ namespace SimpleOwin.Hosts.AspNet
                                     wsEnv[OwinConstants.WebSocketSendAsyncFuncKey] = WebSocketSendAsync(webSocket);
                                     wsEnv[OwinConstants.WebSocketReceiveAsyncFuncKey] = WebSocketReceiveAsync(webSocket);
                                     wsEnv[OwinConstants.WebSocketCloseAsyncFuncKey] = WebSocketCloseAsync(webSocket);
-                                    wsEnv[OwinConstants.WebSocketVersionKey] = "1.0";
+                                    wsEnv[OwinConstants.WebSocketVersionKey] = OwinConstants.WebSocketVersion;
                                     wsEnv[OwinConstants.WebSocketCallCancelledKey] = CancellationToken.None;
                                     wsEnv[OwinConstants.AspNetWebSocketContextKey] = websocketContext;
 
@@ -369,7 +369,7 @@ namespace SimpleOwin.Hosts.AspNet
 #if ASPNET_WEBSOCKETS
             if (Environment.OSVersion.Platform == PlatformID.Win32NT && Environment.OSVersion.Version >= new Version(6, 2) || HttpRuntime.IISVersion != null && HttpRuntime.IISVersion.Major >= 8)
             {
-                properties[OwinConstants.WebSocketVersionKey] = "1.0";
+                properties[OwinConstants.WebSocketVersionKey] = OwinConstants.WebSocketVersion;
                 properties[OwinConstants.WebSocketSupportKey] = "WebSocketFunc";
             }
 #endif
@@ -611,6 +611,7 @@ namespace SimpleOwin.Hosts.AspNet
 
             public const string HttpContextBaseKey = "aspnet.HttpContextBase";
 
+            public const string WebSocketVersion = "1.0";
             public const string WebSocketVersionKey = "websocket.Version";
             public const string WebSocketSupportKey = "websocket.Support";
             public const string WebSocketFuncKey = "websocket.Func";
