@@ -104,7 +104,8 @@ namespace SimpleOwin.Hosts.AspNet
             CompletedTask = tcs.Task;
 
             var startup = GetStartupProperties();
-            if (startup.ContainsKey(OwinConstants.WebSocketVersionKey) && startup.ContainsKey(OwinConstants.WebSocketSupportKey))
+            if (Get<string>(startup, OwinConstants.WebSocketVersion, null) == OwinConstants.WebSocketVersion
+                && Get<string>(startup, OwinConstants.WebSocketSupportKey, null) == OwinConstants.WebSocketSupport)
             {
                 SupportsWebSockets = true;
             }
@@ -254,7 +255,7 @@ namespace SimpleOwin.Hosts.AspNet
             if (context.IsWebSocketRequest)
             {
                 env[OwinConstants.WebSocketVersionKey] = OwinConstants.WebSocketVersion;
-                env[OwinConstants.WebSocketSupportKey] = "WebSocketFunc";
+                env[OwinConstants.WebSocketSupportKey] = OwinConstants.WebSocketSupport;
             }
 #endif
 
@@ -370,7 +371,7 @@ namespace SimpleOwin.Hosts.AspNet
             if (Environment.OSVersion.Platform == PlatformID.Win32NT && Environment.OSVersion.Version >= new Version(6, 2) || HttpRuntime.IISVersion != null && HttpRuntime.IISVersion.Major >= 8)
             {
                 properties[OwinConstants.WebSocketVersionKey] = OwinConstants.WebSocketVersion;
-                properties[OwinConstants.WebSocketSupportKey] = "WebSocketFunc";
+                properties[OwinConstants.WebSocketSupportKey] = OwinConstants.WebSocketSupport;
             }
 #endif
             return properties;
@@ -612,6 +613,7 @@ namespace SimpleOwin.Hosts.AspNet
             public const string HttpContextBaseKey = "aspnet.HttpContextBase";
 
             public const string WebSocketVersion = "1.0";
+            public const string WebSocketSupport = "WebSocketFunc";
             public const string WebSocketVersionKey = "websocket.Version";
             public const string WebSocketSupportKey = "websocket.Support";
             public const string WebSocketFuncKey = "websocket.Func";
