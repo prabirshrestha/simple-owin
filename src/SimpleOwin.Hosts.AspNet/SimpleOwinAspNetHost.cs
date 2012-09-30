@@ -610,7 +610,7 @@ namespace SimpleOwin.Hosts.AspNet
             public const string ResponseStatusCodeKey = "owin.ResponseStatusCode";
             public const string ResponseReasonPhraseKey = "owin.ResponseReasonPhrase";
 
-            public const string HttpContextBaseKey = "aspnet.HttpContextBase";
+            public const string HttpContextBaseKey = "System.Web.HttpContextBase";
 
             public const string WebSocketVersion = "1.0";
             public const string WebSocketSupport = "WebSocketFunc";
