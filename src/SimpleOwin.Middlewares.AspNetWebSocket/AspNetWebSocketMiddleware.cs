@@ -201,7 +201,7 @@ namespace SimpleOwin.Middlewares.AspNetWebSocket
                                                                     wsEnv["websocket.CloseAsyncFunc"] = WebSocketCloseAsync(webSocket);
                                                                     wsEnv["websocket.Version"] = "1.0";
                                                                     wsEnv["websocket.CallCancelled"] = CancellationToken.None;
-                                                                    wsEnv["aspnet.AspNetWebSocketContext"] = websocketContext;
+                                                                    wsEnv["System.Web.WebSockets.AspNetWebSocketContext"] = websocketContext;
 
                                                                     await wsBodyDelegate(wsEnv);
 

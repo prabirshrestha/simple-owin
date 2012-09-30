@@ -622,7 +622,7 @@ namespace SimpleOwin.Hosts.AspNet
             public const string WebSocketCloseAsyncFuncKey = "websocket.CloseAsyncFunc";
             public const string WebSocketCallCancelledKey = "websocket.CallCancelled";
 
-            public const string AspNetWebSocketContextKey = "aspnet.AspNetWebSocketContext";
+            public const string AspNetWebSocketContextKey = "System.Web.WebSockets.AspNetWebSocketContext";
         }
     }
 }
