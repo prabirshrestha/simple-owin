@@ -59,30 +59,56 @@ namespace SimpleOwin.Hosts.AspNet
 
 #endif
 
+    /// <summary>
+    /// SimpleOwin ASP.NET Router Handler
+    /// </summary>
     public class SimpleOwinAspNetRouteHandler : IRouteHandler
     {
         private readonly SimpleOwinAspNetHandler simpleOwinAspNetHandler;
 
+        /// <summary>
+        /// Initializes a new instance of <see cref="SimpleOwinAspNetRouteHandler"/>.
+        /// </summary>
+        /// <param name="app">The owin app.</param>
         public SimpleOwinAspNetRouteHandler(AppFunc app)
             : this(app, null)
         {
         }
 
+        /// <summary>
+        /// Initializes a new instance of <see cref="SimpleOwinAspNetRouteHandler"/>.
+        /// </summary>
+        /// <param name="app">The app.</param>
+        /// <param name="root">The root path.</param>
         public SimpleOwinAspNetRouteHandler(AppFunc app, string root)
         {
             this.simpleOwinAspNetHandler = new SimpleOwinAspNetHandler(app, root);
         }
 
+        /// <summary>
+        /// Initializes a new instance of <see cref="SimpleOwinAspNetRouteHandler"/>.
+        /// </summary>
+        /// <param name="apps">The owin apps.</param>
         public SimpleOwinAspNetRouteHandler(IEnumerable<Func<AppFunc, AppFunc>> apps)
             : this(apps, null)
         {
         }
 
+        /// <summary>
+        /// Initializes a new instance of <see cref="SimpleOwinAspNetRouteHandler"/>.
+        /// </summary>
+        /// <param name="apps">The owin apps.</param>
+        /// <param name="root">The root path.</param>
         public SimpleOwinAspNetRouteHandler(IEnumerable<Func<AppFunc, AppFunc>> apps, string root)
         {
             this.simpleOwinAspNetHandler = new SimpleOwinAspNetHandler(apps, root);
         }
 
+        /// <summary>
+        /// Gets the SimpleOwin ASP.NET http handler.
+        /// </summary>
+        /// <param name="requestContext">The request context.</param>
+        /// <returns>The SimpleOwin ASP.NET http handler.</returns>
         public IHttpHandler GetHttpHandler(RequestContext requestContext)
         {
             return simpleOwinAspNetHandler;
