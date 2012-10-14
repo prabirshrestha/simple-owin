@@ -115,6 +115,9 @@ namespace SimpleOwin.Hosts.AspNet
         }
     }
 
+    /// <summary>
+    /// The SimpleOwin ASP.NET http async handler.
+    /// </summary>
     public class SimpleOwinAspNetHandler : IHttpAsyncHandler
     {
         private readonly AppFunc appFunc;
@@ -137,11 +140,20 @@ namespace SimpleOwin.Hosts.AspNet
             }
         }
 
+        /// <summary>
+        /// Initializes a new instance of <see cref="SimpleOwinAspNetHandler"/>.
+        /// </summary>
+        /// <param name="app">The owin app.</param>
         public SimpleOwinAspNetHandler(AppFunc app)
             : this(app, null)
         {
         }
 
+        /// <summary>
+        /// Initializes a new instance of <see cref="SimpleOwinAspNetHandler"/>.
+        /// </summary>
+        /// <param name="app">The owin app.</param>
+        /// <param name="root">The root path.</param>
         public SimpleOwinAspNetHandler(AppFunc app, string root)
         {
             if (app == null)
@@ -159,16 +171,30 @@ namespace SimpleOwin.Hosts.AspNet
             }
         }
 
+        /// <summary>
+        /// Initializes a new instance of <see cref="SimpleOwinAspNetHandler"/>.
+        /// </summary>
+        /// <param name="apps">The owin apps.</param>
         public SimpleOwinAspNetHandler(IEnumerable<Func<AppFunc, AppFunc>> apps)
             : this(apps, null)
         {
         }
 
+        /// <summary>
+        /// Initializes a new instance of <see cref="SimpleOwinAspNetHandler"/>.
+        /// </summary>
+        /// <param name="apps">The owin apps.</param>
+        /// <param name="root">The root path.</param>
         public SimpleOwinAspNetHandler(IEnumerable<Func<AppFunc, AppFunc>> apps, string root)
             : this(ToOwinApp(apps), root)
         {
         }
 
+        /// <summary>
+        /// Converts apps to owin app.
+        /// </summary>
+        /// <param name="apps">The apps.</param>
+        /// <returns>The owin app.</returns>
         public static AppFunc ToOwinApp(IEnumerable<Func<AppFunc, AppFunc>> apps)
         {
             if (apps == null)
@@ -199,6 +225,16 @@ namespace SimpleOwin.Hosts.AspNet
             return BeginProcessRequest(new HttpContextWrapper(context), callback, state);
         }
 
+        /// <summary>
+        /// Initiates an asynchronous call to the HTTP handler.
+        /// </summary>
+        /// 
+        /// <returns>
+        /// An <see cref="T:System.IAsyncResult"/> that contains information about the status of the process.
+        /// </returns>
+        /// <param name="context">An <see cref="T:System.Web.HttpContextBase"/> object that provides references to intrinsic server objects (for example, Request, Response, Session, and Server) used to service HTTP requests. </param>
+        /// <param name="callback">The <see cref="T:System.AsyncCallback"/> to call when the asynchronous method call is complete. If <paramref name="callback"/> is null, the delegate is not called. </param>
+        /// <param name="state">Any extra data needed to process the request. </param>
         public IAsyncResult BeginProcessRequest(HttpContextBase context, AsyncCallback callback, object state)
         {
             var tcs = new TaskCompletionSource<Action>(state);
@@ -389,6 +425,10 @@ namespace SimpleOwin.Hosts.AspNet
             return env.TryGetValue(key, out value) && value is T ? (T)value : defaultValue;
         }
 
+        /// <summary>
+        /// Gets the owin startup properties.
+        /// </summary>
+        /// <returns>The owin statup properties.</returns>
         public static IDictionary<string, object> GetStartupProperties()
         {
             var properties = new Dictionary<string, object>(StringComparer.OrdinalIgnoreCase);
