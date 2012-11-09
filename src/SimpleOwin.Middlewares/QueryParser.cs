@@ -16,7 +16,7 @@
                 next =>
                 env =>
                 {
-                    env["simpleOwin.query"] = new Lazy<IDictionary<string, string[]>>(() => ParseQuerystring(env.GetOwinRequestQueryString(), urlDecoder));
+                    env["simpleOwin.query"] = new Lazy<IDictionary<string, string[]>>(() => ParseQuerystring(env.GetRequestQueryString(), urlDecoder));
                     return next(env);
                 };
         }

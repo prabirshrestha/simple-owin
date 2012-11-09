@@ -21,13 +21,13 @@
                     if (!string.IsNullOrWhiteSpace(contentType))
                     {
                         var headers = env
-                            .SetOwinResponseStatusCode(404)
-                            .GetOwinResponseHeaders();
-                        headers.SetOwinHeader("content-type", contentType);
+                            .SetResponseStatusCode(404)
+                            .GetResponseHeaders();
+                        headers.SetHeader("content-type", contentType);
                     }
 
                     env
-                        .GetOwinResponseBody()
+                        .GetResponseBody()
                         .Write(data, 0, data.Length);
 
                     return next(env);

@@ -18,14 +18,14 @@
                 env =>
                 {
                     var userAgent = env
-                        .GetOwinRequestHeaders()
+                        .GetRequestHeaders()
                         .GetOwinHeaderValue("user-agent");
 
                     if (!string.IsNullOrWhiteSpace(userAgent) && userAgent.IndexOf("MSIE", StringComparison.Ordinal) > 1)
                     {
                         // todo: only for html/htm requests
-                        env.GetOwinResponseHeaders()
-                            .SetOwinHeader("X-UA-Compatible", "IE=Edge,chrome=1");
+                        env.GetResponseHeaders()
+                            .SetHeader("X-UA-Compatible", "IE=Edge,chrome=1");
                     }
 
                     return next(env);
@@ -38,8 +38,8 @@
                 next =>
                 env =>
                 {
-                    env.GetOwinResponseHeaders()
-                        .RemoveOwinHeader("X-Powered-By");
+                    env.GetResponseHeaders()
+                        .RemoveHeader("X-Powered-By");
 
                     return next(env);
                 };
@@ -54,9 +54,9 @@
                 next =>
                 env =>
                 {
-                    env.GetOwinResponseHeaders()
-                        .SetOwinHeader("Access-Control-Allow-Origin", "*")
-                        .SetOwinHeader("Access-Control-Allow-Headers", "X-Requested-With");
+                    env.GetResponseHeaders()
+                        .SetHeader("Access-Control-Allow-Origin", "*")
+                        .SetHeader("Access-Control-Allow-Headers", "X-Requested-With");
 
                     return next(env);
                 };
