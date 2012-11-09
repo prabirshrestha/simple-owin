@@ -125,7 +125,6 @@ namespace SimpleOwinAspNetHost.Samples.WebSockets.HelloworldAutodetect
         public static AppFunc OwinApp()
         {
             var apps = OwinApps().ToList();
-            // return SimpleOwinAspNetHandler.ConvertApp(apps);
 
             return
                 env =>

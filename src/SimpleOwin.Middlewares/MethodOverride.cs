@@ -16,10 +16,10 @@
                 next =>
                 env =>
                 {
-                    string originalMethod = env.GetOwinRequestMethod();
+                    string originalMethod = env.GetRequestMethod();
 
                     var method = env
-                        .GetOwinRequestHeaders()
+                        .GetRequestHeaders()
                         .GetOwinHeaderValue("x-http-method-override");
 
                     if (string.IsNullOrWhiteSpace(method))
@@ -27,7 +27,7 @@
                         // try checking body, requires JsonBodyParser/UrlEncoded middleware
                         if (checkBody)
                         {
-                            var body = env.GetOwinEnvironmentValue<Lazy<object>>("simpleOwin.body");
+                            var body = env.GetEnvironmentValue<Lazy<object>>("simpleOwin.body");
                             if (body != null)
                             {
                                 IDictionary<string, object> dictStringObject = null;
@@ -74,7 +74,7 @@
                         // try checking querystring, requires QueryParser middleware
                         if (checkQuerystring && string.IsNullOrWhiteSpace(method))
                         {
-                            var qs = env.GetOwinEnvironmentValue<Lazy<IDictionary<string, string[]>>>("simpleOwin.query");
+                            var qs = env.GetEnvironmentValue<Lazy<IDictionary<string, string[]>>>("simpleOwin.query");
                             if (qs != null)
                                 method = qs.Value.GetOwinHeaderValue(key);
                         }
@@ -82,7 +82,7 @@
 
                     if (!string.IsNullOrWhiteSpace(method))
                     {
-                        env.SetOwinRequestMethod(method.ToUpperInvariant());
+                        env.SetRequestMethod(method.ToUpperInvariant());
                         env["simpleOwin.originalRequestMethod"] = originalMethod;
                     }
 

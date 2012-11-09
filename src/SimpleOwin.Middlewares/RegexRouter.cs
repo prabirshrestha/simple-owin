@@ -14,7 +14,7 @@ namespace SimpleOwin.Middlewares
         {
             public static IDictionary<string, string> GetSimpleOwinRouteParameters(this IDictionary<string, object> env)
             {
-                return env.GetOwinEnvironmentValue<IDictionary<string, string>>("SimpleOwin.Route.Parameters");
+                return env.GetEnvironmentValue<IDictionary<string, string>>("SimpleOwin.Route.Parameters");
             }
         }
     }
@@ -132,8 +132,8 @@ namespace SimpleOwin.Middlewares
             return next =>
                    env =>
                    {
-                       var method = env.GetOwinRequestMethod();
-                       var path = env.GetOwinRequestPath();
+                       var method = env.GetRequestMethod();
+                       var path = env.GetRequestPath();
 
                        foreach (var routeToExectue in this.routes)
                        {

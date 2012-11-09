@@ -29,7 +29,7 @@
             router.Get("/", next =>
                            async env =>
                            {
-                               await env.GetOwinResponseBody()
+                               await env.GetResponseBody()
                                    .WriteStringAsync("hi");
                            });
 
@@ -41,14 +41,14 @@
 
                                 string html = template.Run("/hi", new { name = routeParameters["name"] }.ToDynamicObject());
 
-                                await env.GetOwinResponseBody()
+                                await env.GetResponseBody()
                                     .WriteStringAsync(html);
                             });
 
             router.Get("/hello", next =>
                                 async env =>
                                 {
-                                    await env.GetOwinResponseBody()
+                                    await env.GetResponseBody()
                                         .WriteStringAsync("Hello");
                                 });
 

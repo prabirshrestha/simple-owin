@@ -22,8 +22,8 @@
                         return next(env);
 
                     var contentType = env
-                        .GetOwinRequestHeaders()
-                        .GetOwinHeaderValues("content-type");
+                        .GetRequestHeaders()
+                        .GetHeaderValues("content-type");
 
                     if (contentType == null)
                         return next(env);
@@ -33,7 +33,7 @@
                         env["simpleOwin.body"] = new Lazy<IDictionary<string, string[]>>(
                             () =>
                             {
-                                return ParseUrlFormEncodedBody(env.GetOwinRequestBody(), urlDecoder);
+                                return ParseUrlFormEncodedBody(env.GetRequestBody(), urlDecoder);
                             });
                     }
 
