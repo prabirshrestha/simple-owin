@@ -222,17 +222,17 @@ namespace SimpleOwin.Extensions
 
         public static WebSocketSendAsync GetWebSocketSendAsync(this WsEnv wsEnv)
         {
-            return wsEnv.GetEnvironmentValue<WebSocketSendAsync>("websocket.SendAsyncFunc");
+            return wsEnv.GetEnvironmentValue<WebSocketSendAsync>("websocket.SendAsync");
         }
 
         public static WebSocketReceiveAsync GetWebSocketReceiveAsync(this WsEnv wsEnv)
         {
-            return wsEnv.GetEnvironmentValue<WebSocketReceiveAsync>("websocket.ReceiveAsyncFunc");
+            return wsEnv.GetEnvironmentValue<WebSocketReceiveAsync>("websocket.ReceiveAsync");
         }
 
         public static WebSocketCloseAsync GetWebSocketCloseAsync(this WsEnv wsEnv)
         {
-            return wsEnv.GetEnvironmentValue<WebSocketCloseAsync>("websocket.CloseAsyncFunc");
+            return wsEnv.GetEnvironmentValue<WebSocketCloseAsync>("websocket.CloseAsync");
         }
 
         public static CancellationToken GetWebSocketCallCancelled(this WsEnv wsEnv)
@@ -247,17 +247,17 @@ namespace SimpleOwin.Extensions
 
         public static WsEnv SetWebSocketSendAsync(this WsEnv wsEnv, WebSocketSendAsync webSocketSendAsync)
         {
-            return wsEnv.SetEnvironmentValue("websocket.SendAsyncFunc", webSocketSendAsync);
+            return wsEnv.SetEnvironmentValue("websocket.SendAsync", webSocketSendAsync);
         }
 
         public static WsEnv SetWebSocketReceiveAsync(this WsEnv wsEnv, WebSocketReceiveAsync webSocketReceiveAsync)
         {
-            return wsEnv.SetEnvironmentValue("websocket.ReceiveAsyncFunc", webSocketReceiveAsync);
+            return wsEnv.SetEnvironmentValue("websocket.ReceiveAsync", webSocketReceiveAsync);
         }
 
         public static WsEnv SetWebSocketCloseAsync(this WsEnv wsEnv, WebSocketCloseAsync webSocketCloseAsync)
         {
-            return wsEnv.SetEnvironmentValue("websocket.CloseAsyncFunc", webSocketCloseAsync);
+            return wsEnv.SetEnvironmentValue("websocket.CloseAsync", webSocketCloseAsync);
         }
 
         public static WsEnv SetWebSocketCallCancelled(this WsEnv wsEnv, CancellationToken cancellationToken)
