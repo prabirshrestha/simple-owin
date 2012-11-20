@@ -13,6 +13,12 @@ namespace SimpleOwinAspNetHost.Samples.WebSockets.Helloworld
 
     using AppFunc = System.Func<System.Collections.Generic.IDictionary<string, object>, System.Threading.Tasks.Task>;
 
+    using WebSocketAccept = System.Action<
+            System.Collections.Generic.IDictionary<string, object>, // WebSocket Accept parameters
+            System.Func< // WebSocketFunc callback
+                System.Collections.Generic.IDictionary<string, object>, // WebSocket environment
+                System.Threading.Tasks.Task>>;
+
     using WebSocketFunc =
        System.Func<
            System.Collections.Generic.IDictionary<string, object>, // WebSocket Environment
@@ -66,41 +72,51 @@ namespace SimpleOwinAspNetHost.Samples.WebSockets.Helloworld
             {
                 var responseBody = (Stream)env["owin.ResponseBody"];
 
-                var webSocketSupport = Get<string>(env, "websocket.Support");
-                if (webSocketSupport != null && webSocketSupport.Contains("WebSocketFunc"))
+                object temp;
+                if (env.TryGetValue("websocket.Accept", out temp) && temp != null)
                 {
-                    // websocket supported
-                    env["owin.ResponseStatusCode"] = 101;
-                    WebSocketFunc webSocketBody = async wsEnv =>
+                    var wsAccept = (WebSocketAccept)temp;
+                    var requestHeaders = Get<IDictionary<string, string[]>>(env, "owin.RequestHeaders");
+
+                    Dictionary<string, object> acceptOptions = null;
+                    string[] subProtocols;
+                    if (requestHeaders.TryGetValue("Sec-WebSocket-Protocol", out subProtocols) && subProtocols.Length > 0)
                     {
-                        var wsSendAsync = (WebSocketSendAsync)env["websocket.SendAsyncFunc"];
-                        var wsRecieveAsync = (WebSocketReceiveAsync)env["websocket.ReceiveAsyncFunc"];
-                        var wsCloseAsync = (WebSocketCloseAsync)env["websocket.CloseAsyncFunc"];
-                        var wsVersion = (WebSocketReceiveAsync)env["websocket.Version"];
-                        var wsCallCancelled = (CancellationToken)env["websocket.CallCancelled"];
+                        acceptOptions = new Dictionary<string, object>();
+                        // Select the first one from the client
+                        acceptOptions.Add("websocket.SubProtocol", subProtocols[0].Split(',').First().Trim());
+                    }
 
-                        // note: make sure to catch errors when calling sendAsync, receiveAsync and closeAsync
-                        // for simiplicity this code does not handle errors
-                        var buffer = new ArraySegment<byte>(new byte[6]);
-                        while (true)
-                        {
-                            var webSocketResultTuple = await wsRecieveAsync(buffer, CancellationToken.None);
-                            int wsMessageType = webSocketResultTuple.Item1;
-                            bool wsEndOfMessge = webSocketResultTuple.Item2;
-                            int? count = webSocketResultTuple.Item3;
-                            int? closeStatus = webSocketResultTuple.Item4;
-                            string closeStatusDescription = webSocketResultTuple.Item5;
+                    wsAccept(acceptOptions, async wsEnv =>
+                                                {
+                                                    var wsSendAsync = (WebSocketSendAsync)wsEnv["websocket.SendAsync"];
+                                                    var wsRecieveAsync = (WebSocketReceiveAsync)wsEnv["websocket.ReceiveAsync"];
+                                                    var wsCloseAsync = (WebSocketCloseAsync)wsEnv["websocket.CloseAsync"];
+                                                    var wsVersion = (string)wsEnv["websocket.Version"];
+                                                    var wsCallCancelled = (CancellationToken)wsEnv["websocket.CallCancelled"];
 
-                            Debug.Write(Encoding.UTF8.GetString(buffer.Array, 0, count.Value));
+                                                    // note: make sure to catch errors when calling sendAsync, receiveAsync and closeAsync
+                                                    // for simiplicity this code does not handle errors
+                                                    var buffer = new ArraySegment<byte>(new byte[6]);
+                                                    while (true)
+                                                    {
+                                                        var webSocketResultTuple = await wsRecieveAsync(buffer, wsCallCancelled);
+                                                        int wsMessageType = webSocketResultTuple.Item1;
+                                                        bool wsEndOfMessge = webSocketResultTuple.Item2;
+                                                        int? count = webSocketResultTuple.Item3;
+                                                        int? closeStatus = webSocketResultTuple.Item4;
+                                                        string closeStatusDescription = webSocketResultTuple.Item5;
 
-                            if (wsEndOfMessge)
-                                break;
-                        }
+                                                        Debug.Write(Encoding.UTF8.GetString(buffer.Array, 0, count.Value));
 
-                        await wsCloseAsync((int)WebSocketCloseStatus.NormalClosure, "Closing", CancellationToken.None);
-                    };
+                                                        await wsSendAsync(new ArraySegment<byte>(buffer.ToArray(), 0, count.Value), 1, wsEndOfMessge, wsCallCancelled);
 
-                    env["websocket.Func"] = webSocketBody;
+                                                        if (wsEndOfMessge)
+                                                            break;
+                                                    }
+
+                                                    await wsCloseAsync((int)WebSocketCloseStatus.NormalClosure, "Closing", CancellationToken.None);
+                                                });
                 }
                 else
                 {

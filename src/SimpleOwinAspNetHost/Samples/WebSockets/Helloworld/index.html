@@ -13,7 +13,7 @@
             testWebSocket();
         }
         function testWebSocket() {
-            websocket = new WebSocket(wsUri);
+            websocket = new WebSocket(wsUri, ['echo', 'chat']);
             websocket.onopen = function (evt) { onOpen(evt); };
             websocket.onclose = function (evt) { onClose(evt); };
             websocket.onmessage = function (evt) { onMessage(evt); };

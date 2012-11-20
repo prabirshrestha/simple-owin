@@ -17,6 +17,12 @@ namespace SimpleOwin.Extensions
 
     using AppFunc = System.Func<System.Collections.Generic.IDictionary<string, object>, System.Threading.Tasks.Task>;
 
+    using WebSocketAccept = System.Action<
+                    System.Collections.Generic.IDictionary<string, object>, // WebSocket Accept parameters
+                    System.Func< // WebSocketFunc callback
+                        System.Collections.Generic.IDictionary<string, object>, // WebSocket environment
+                        System.Threading.Tasks.Task>>;
+
     using WebSocketCloseAsync = System.Func<
                     int, // closeStatus
                     string, // closeDescription

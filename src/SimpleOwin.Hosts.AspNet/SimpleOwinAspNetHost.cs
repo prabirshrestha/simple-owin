@@ -11,15 +11,21 @@ namespace SimpleOwin.Hosts.AspNet
     using System.Linq;
 #if ASPNET_WEBSOCKETS
     using System.Net.WebSockets;
+    using System.Web.WebSockets;
 #endif
     using System.Threading;
     using System.Threading.Tasks;
     using System.Web;
     using System.Web.Routing;
-
     using AppFunc = System.Func<System.Collections.Generic.IDictionary<string, object>, System.Threading.Tasks.Task>;
 
 #if ASPNET_WEBSOCKETS
+
+    using WebSocketAccept = System.Action<
+                System.Collections.Generic.IDictionary<string, object>, // WebSocket Accept parameters
+                System.Func< // WebSocketFunc callback
+                    System.Collections.Generic.IDictionary<string, object>, // WebSocket environment
+                    System.Threading.Tasks.Task>>;
 
     using WebSocketFunc =
        System.Func<
@@ -237,6 +243,7 @@ namespace SimpleOwin.Hosts.AspNet
 
             var request = context.Request;
             var response = context.Response;
+            response.BufferOutput = false;
 
             var pathBase = request.ApplicationPath;
             if (pathBase == "/" || pathBase == null)
@@ -306,14 +313,29 @@ namespace SimpleOwin.Hosts.AspNet
             env[OwinConstants.HttpContextBase] = context;
 
 #if ASPNET_WEBSOCKETS
-            if (context.IsWebSocketRequest)
-            {
-                env[OwinConstants.WebSocketVersion] = "1.0";
-                env[OwinConstants.WebSocketSupport] = "WebSocketFunc";
-            }
-#endif
+            WebSocketFunc webSocketFunc = null;
+            IDictionary<string, object> wsAcceptOptions = null;
 
-            response.BufferOutput = false;
+            try
+            {
+                // might not be implemented when using custom contexts
+                // so catch NotImplementedException
+                if (context.IsWebSocketRequest)
+                {
+                    env[OwinConstants.WebSocketAcceptKey] = new WebSocketAccept(
+                        (options, wsCallback) =>
+                        {
+                            env[OwinConstants.ResponseStatusCode] = 101;
+                            wsAcceptOptions = options;
+                            webSocketFunc = wsCallback;
+                        });
+                }
+            }
+            catch (NotImplementedException)
+            {
+            }
+
+#endif
 
             try
             {
@@ -331,31 +353,26 @@ namespace SimpleOwin.Hosts.AspNet
                         else
                         {
 #if ASPNET_WEBSOCKETS
-                            object tempWsBodyDelegate;
+                            responseStatusCode = Get<int>(env, OwinConstants.ResponseStatusCode, 200);
 
-                            if (responseStatusCode == null)
+                            if (webSocketFunc != null && responseStatusCode == 101)
                             {
-                                responseStatusCode = Get<int>(env, OwinConstants.ResponseStatusCode, 200);
-                            }
+                                var options = new AspNetWebSocketOptions();
+                                options.SubProtocol = GetSubProtocol(env, wsAcceptOptions);
 
-                            if (responseStatusCode.Value == 101 &&
-                                env.TryGetValue(OwinConstants.WebSocketFunc, out tempWsBodyDelegate) &&
-                                tempWsBodyDelegate != null)
-                            {
-                                var wsBodyDelegate = (WebSocketFunc)tempWsBodyDelegate;
-                                context.AcceptWebSocketRequest(async websocketContext => // todo: AcceptWebSocketRequest throws error
+                                context.AcceptWebSocketRequest(async websocketContext =>
                                 {
                                     var webSocket = websocketContext.WebSocket;
 
                                     var wsEnv = new Dictionary<string, object>(StringComparer.OrdinalIgnoreCase);
-                                    wsEnv[OwinConstants.WebSocketSendAsyncFunc] = WebSocketSendAsync(webSocket);
-                                    wsEnv[OwinConstants.WebSocketReceiveAsyncFunc] = WebSocketReceiveAsync(webSocket);
-                                    wsEnv[OwinConstants.WebSocketCloseAsyncFunc] = WebSocketCloseAsync(webSocket);
+                                    wsEnv[OwinConstants.WebSocketSendAsyncKey] = WebSocketSendAsync(webSocket);
+                                    wsEnv[OwinConstants.WebSocketReceiveAsyncKey] = WebSocketReceiveAsync(webSocket);
+                                    wsEnv[OwinConstants.WebSocketCloseAsyncKey] = WebSocketCloseAsync(webSocket);
                                     wsEnv[OwinConstants.WebSocketVersion] = "1.0";
                                     wsEnv[OwinConstants.WebSocketCallCancelled] = CancellationToken.None;
-                                    wsEnv[OwinConstants.AspNetWebSocketContext] = websocketContext;
+                                    wsEnv[OwinConstants.WebSocketContext] = websocketContext;
 
-                                    await wsBodyDelegate(wsEnv);
+                                    await webSocketFunc(wsEnv);
 
                                     switch (webSocket.State)
                                     {
@@ -363,7 +380,7 @@ namespace SimpleOwin.Hosts.AspNet
                                         case WebSocketState.Aborted: // closed abortively, no action needed
                                             break;
                                         case WebSocketState.CloseReceived:
-                                            await webSocket.CloseAsync(WebSocketCloseStatus.NormalClosure, string.Empty, CancellationToken.None);
+                                            await webSocket.CloseAsync(webSocket.CloseStatus ?? WebSocketCloseStatus.NormalClosure, webSocket.CloseStatusDescription ?? string.Empty, CancellationToken.None);
                                             break;
                                         case WebSocketState.Open:
                                         case WebSocketState.CloseSent: // No close received, abort so we don't have to drain the pipe.
@@ -374,7 +391,7 @@ namespace SimpleOwin.Hosts.AspNet
                                     }
 
                                     response.Close();
-                                });
+                                }, options);
                             }
 #endif
                             tcs.TrySetResult(() => { });
@@ -429,13 +446,33 @@ namespace SimpleOwin.Hosts.AspNet
             if (Environment.OSVersion.Platform == PlatformID.Win32NT && Environment.OSVersion.Version >= new Version(6, 2) || HttpRuntime.IISVersion != null && HttpRuntime.IISVersion.Major >= 8)
             {
                 properties[OwinConstants.WebSocketVersion] = "1.0";
-                properties[OwinConstants.WebSocketSupport] = "WebSocketFunc";
             }
 #endif
             return properties;
         }
 
 #if ASPNET_WEBSOCKETS
+
+        private static string GetSubProtocol(IDictionary<string, object> env, IDictionary<string, object> acceptOptions)
+        {
+            var reponseHeaders = Get<IDictionary<string, string[]>>(env, OwinConstants.ResponseHeaders, null);
+
+            // Remove the subprotocol header, Accept will re-add it.
+            string subProtocol = null;
+            string[] subProtocols;
+            if (reponseHeaders.TryGetValue(OwinConstants.SecWebSocketProtocol, out subProtocols) && subProtocols.Length > 0)
+            {
+                subProtocol = subProtocols[0];
+                reponseHeaders.Remove(OwinConstants.SecWebSocketProtocol);
+            }
+
+            if (acceptOptions != null && acceptOptions.ContainsKey(OwinConstants.WebSocketSubProtocolKey))
+            {
+                subProtocol = Get<string>(acceptOptions, OwinConstants.WebSocketSubProtocolKey, null);
+            }
+
+            return subProtocol;
+        }
 
         private static WebSocketSendAsync WebSocketSendAsync(WebSocket webSocket)
         {
@@ -668,14 +705,15 @@ namespace SimpleOwin.Hosts.AspNet
             public const string HttpContextBase = "System.Web.HttpContextBase";
 
             public const string WebSocketVersion = "websocket.Version";
-            public const string WebSocketSupport = "websocket.Support";
-            public const string WebSocketFunc = "websocket.Func";
-            public const string WebSocketSendAsyncFunc = "websocket.SendAsyncFunc";
-            public const string WebSocketReceiveAsyncFunc = "websocket.ReceiveAsyncFunc";
-            public const string WebSocketCloseAsyncFunc = "websocket.CloseAsyncFunc";
+            public const string WebSocketAcceptKey = "websocket.Accept";
+            public const string SecWebSocketProtocol = "Sec-WebSocket-Protocol";
+            public const string WebSocketSubProtocolKey = "websocket.SubProtocol";
+            public const string WebSocketSendAsyncKey = "websocket.SendAsync";
+            public const string WebSocketReceiveAsyncKey = "websocket.ReceiveAsync";
+            public const string WebSocketCloseAsyncKey = "websocket.CloseAsync";
             public const string WebSocketCallCancelled = "websocket.CallCancelled";
 
-            public const string AspNetWebSocketContext = "System.Web.WebSockets.AspNetWebSocketContext";
+            public const string WebSocketContext = "System.Net.WebSockets.WebSocketContext";
         }
     }
 }
