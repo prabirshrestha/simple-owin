@@ -22,7 +22,7 @@ nuget.setDefaults({
     verbose: true
 })
 
-task('default', ['build'])
+task('default', ['build', 'nuget:pack'])
 
 directory('dist/')
 directory('working/')
