@@ -17,7 +17,7 @@
         <file src="..\..\LICENSE.txt" target="LICENSE.txt" />
         <file src="..\..\bin\SimpleOwin.Extensions\net40\SimpleOwin.Extensions.dll" target="lib\net40" />
         <file src="..\..\bin\SimpleOwin.Extensions\net40\SimpleOwin.Extensions.xml" target="lib\net40" />
-        <file src="..\..\bin\SimpleOwin.Extensions\portable-net40+winrt+wp8+sl5\SimpleOwin.Extensions.dll" target="lib\portable-net40+winrt+wp8+sl5" />
-        <file src="..\..\bin\SimpleOwin.Extensions\portable-net40+winrt+wp8+sl5\SimpleOwin.Extensions.xml" target="lib\portable-net40+winrt+wp8+sl5" />
+        <file src="..\..\bin\SimpleOwin.Extensions\portable-net40+cwin8+wp8+sl5\SimpleOwin.Extensions.dll" target="lib\portable-net40+win8+wp8+sl5" />
+        <file src="..\..\bin\SimpleOwin.Extensions\portable-net40+win8+wp8+sl5\SimpleOwin.Extensions.xml" target="lib\portable-net40+win8+wp8+sl5" />
     </files>
 </package>
