@@ -1,6 +1,7 @@
 ﻿//#define ASPNET_WEBSOCKETS
 
 // https://github.com/prabirshrestha/simple-owin
+// Compatible with OWIN 1.0 and WebSocket 0.4.0
 
 namespace SimpleOwin.Hosts.AspNet
 {
