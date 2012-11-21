@@ -18,9 +18,9 @@
         <file src="..\..\..\bin\SimpleOwin.Extensions\net40\SimpleOwin.Extensions.dll" target="lib\net40" />
         <file src="..\..\..\bin\SimpleOwin.Extensions\net40\SimpleOwin.Extensions.pdb" target="lib\net40" />
         <file src="..\..\..\bin\SimpleOwin.Extensions\net40\SimpleOwin.Extensions.xml" target="lib\net40" />
-        <file src="..\..\..\bin\SimpleOwin.Extensions\portable-net40+winrt+sl5\SimpleOwin.Extensions.dll" target="lib\portable-net40+winrt+sl5" />
-        <file src="..\..\..\bin\SimpleOwin.Extensions\portable-net40+winrt+sl5\SimpleOwin.Extensions.pdb" target="lib\portable-net40+winrt+sl5" />
-        <file src="..\..\..\bin\SimpleOwin.Extensions\portable-net40+winrt+sl5\SimpleOwin.Extensions.xml" target="lib\portable-net40+winrt+sl5" />
+        <file src="..\..\..\bin\SimpleOwin.Extensions\portable-net40+winrt+wp8+sl5\SimpleOwin.Extensions.dll" target="lib\portable-net40+winrt+wp8+sl5" />
+        <file src="..\..\..\bin\SimpleOwin.Extensions\portable-net40+winrt+wp8+sl5\SimpleOwin.Extensions.pdb" target="lib\portable-net40+winrt+wp8+sl5" />
+        <file src="..\..\..\bin\SimpleOwin.Extensions\portable-net40+winrt+wp8+sl5\SimpleOwin.Extensions.xml" target="lib\portable-net40+winrt+wp8+sl5" />
         <file src="..\..\SimpleOwin.Extensions\SimpleOwinExtensions.cs" target = "src\SimpleOwin.Extensions\" />
         <file src="..\..\SimpleOwin.Extensions\Properties\AssemblyInfo.cs" target = "src\SimpleOwin.Extensions\Properties\" />
     </files>
