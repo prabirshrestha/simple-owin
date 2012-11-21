@@ -105,7 +105,7 @@ namespace('nuget', function () {
             var csFile = fs
                 .readFileSync('src/SimpleOwin.Hosts.AspNet/SimpleOwinAspNetHost.cs', 'utf-8')
                 .replace('// VERSION:', '// VERSION: ' + config.version)
-                .replace('namespace SimpleOwin.Hosts.AspNet', 'namespace $rootnamespace$.SimpleOwin.Hosts.AspNet')
+                .replace('namespace SimpleOwin.Hosts.AspNet', 'namespace $rootnamespace$.SimpleOwin.Hosts')
                 .replace(/public class/g, 'internal class');
             fs.writeFileSync('working/SimpleOwinAspNetHost.cs.pp', csFile);
         })
