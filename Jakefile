@@ -93,7 +93,7 @@ namespace('nuget', function () {
             var csFile = fs
                 .readFileSync('src/SimpleOwin.Extensions/SimpleOwinExtensions.cs', 'utf-8')
                 .replace('// VERSION:', '// VERSION: ' + config.version)
-                .replace('namespace SimpleOwin.Extensions', 'namespace $rootnamespace$')
+                .replace('namespace SimpleOwin.Extensions', 'namespace $rootnamespace$.SimpleOwin')
                 .replace('public static class', 'internal static class');
 
             fs.writeFileSync('working/SimpleOwinExtensions.cs.pp', csFile);
@@ -105,7 +105,7 @@ namespace('nuget', function () {
             var csFile = fs
                 .readFileSync('src/SimpleOwin.Hosts.AspNet/SimpleOwinAspNetHost.cs', 'utf-8')
                 .replace('// VERSION:', '// VERSION: ' + config.version)
-                .replace('namespace SimpleOwin.Hosts.AspNet', 'namespace $rootnamespace$')
+                .replace('namespace SimpleOwin.Hosts.AspNet', 'namespace $rootnamespace$.SimpleOwin.Hosts.AspNet')
                 .replace(/public class/g, 'internal class');
             fs.writeFileSync('working/SimpleOwinAspNetHost.cs.pp', csFile);
         })
