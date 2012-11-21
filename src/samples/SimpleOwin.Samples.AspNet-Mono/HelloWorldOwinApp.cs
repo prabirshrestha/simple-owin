@@ -13,7 +13,7 @@ namespace SimpleOwin.Samples.AspNetMono
 		{
 			return env =>
 			{
-				env.GetOwinResponseBody()
+				env.GetResponseBody()
 					.WriteString("Hello world");
 
 				var tcs = new TaskCompletionSource<int>(); 
