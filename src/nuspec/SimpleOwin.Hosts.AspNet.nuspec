@@ -15,6 +15,7 @@
     </metadata>
     <files>
         <file src="..\..\LICENSE.txt" target="LICENSE.txt" />
+        <file src="SimpleOwinAspNetApp.cs.pp" target="content\App_Start\SimpleOwinAspNetApp.cs.pp" />
         <file src="..\..\bin\SimpleOwin.Hosts.AspNet\net40\SimpleOwin.Hosts.AspNet.dll" target="lib\net40" />
         <file src="..\..\bin\SimpleOwin.Hosts.AspNet\net40\SimpleOwin.Hosts.AspNet.xml" target="lib\net40" />
         <file src="..\..\bin\SimpleOwin.Hosts.AspNet\net45\SimpleOwin.Hosts.AspNet.dll" target="lib\net45" />

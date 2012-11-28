@@ -15,6 +15,7 @@
     </metadata>
     <files>
         <file src="..\..\LICENSE.txt" target="LICENSE.txt" />
+        <file src="SimpleOwinAspNetApp.cs.pp" target="content\App_Start\SimpleOwinAspNetApp.cs.pp" />
         <file src="..\..\working\SimpleOwinAspNetHost.cs.pp" target="content\SimpleOwin\Hosts\SimpleOwinAspNetHost.cs.pp" />
     </files>
 </package>
