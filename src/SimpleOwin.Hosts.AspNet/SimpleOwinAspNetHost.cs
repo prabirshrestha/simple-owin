@@ -18,6 +18,8 @@ namespace SimpleOwin.Hosts.AspNet
     using System.Threading.Tasks;
     using System.Web;
     using System.Web.Routing;
+    using System.Security.Cryptography.X509Certificates;
+
     using AppFunc = System.Func<System.Collections.Generic.IDictionary<string, object>, System.Threading.Tasks.Task>;
 
 #if ASPNET_WEBSOCKETS
@@ -279,6 +281,11 @@ namespace SimpleOwin.Hosts.AspNet
             env[OwinConstants.RequestHeaders] = request.Headers.AllKeys
                     .ToDictionary(x => x, x => request.Headers.GetValues(x), StringComparer.OrdinalIgnoreCase);
 
+            if (request.ClientCertificate != null && request.ClientCertificate.Certificate.Length != 0)
+            {
+                env[OwinConstants.ClientCertificate] = new X509Certificate(request.ClientCertificate.Certificate);
+            }
+            
             env[OwinConstants.CallCancelled] = CancellationToken.None;
 
             env[OwinConstants.ResponseHeaders] = new Dictionary<string, string[]>(StringComparer.OrdinalIgnoreCase);
@@ -715,6 +722,8 @@ namespace SimpleOwin.Hosts.AspNet
             public const string WebSocketCallCancelled = "websocket.CallCancelled";
 
             public const string WebSocketContext = "System.Net.WebSockets.WebSocketContext";
+
+            public const string ClientCertificate = "ssl.ClientCertificate";
         }
     }
 }
