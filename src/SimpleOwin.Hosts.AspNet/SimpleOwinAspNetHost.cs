@@ -281,8 +281,10 @@ namespace SimpleOwin.Hosts.AspNet
             env[OwinConstants.RequestHeaders] = request.Headers.AllKeys
                     .ToDictionary(x => x, x => request.Headers.GetValues(x), StringComparer.OrdinalIgnoreCase);
 
-            if (request.ClientCertificate.Certificate.Length != 0)
+            if (request.ClientCertificate != null && request.ClientCertificate.Certificate.Length != 0)
+            {
                 env[OwinConstants.ClientCertificate] = new X509Certificate(request.ClientCertificate.Certificate);
+            }
             
             env[OwinConstants.CallCancelled] = CancellationToken.None;
 
